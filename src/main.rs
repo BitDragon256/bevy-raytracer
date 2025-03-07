@@ -1,3 +1,8 @@
+// use bevy::prelude::*;
+
+mod storage_buffer;
+mod specialized_mesh_pipeline;
+
 fn main() {
-    println!("Hello, world!");
+    specialized_mesh_pipeline::main();
 }
