@@ -6,7 +6,7 @@ use bevy::render::render_graph::{NodeRunError, RenderGraphContext, RenderLabel, 
 use bevy::render::render_resource::{BindGroupEntries, Operations, PipelineCache, RenderPassColorAttachment, RenderPassDescriptor};
 use bevy::render::renderer::{RenderContext, RenderQueue};
 use bevy::render::view::ViewTarget;
-use crate::buffer::ModelBuffer;
+use crate::buffer::{IndexBuffer, MeshBuffer, VertexBuffer};
 use crate::pipeline::RaytracingPipeline;
 use crate::render::GpuRaytracingCamera;
 
@@ -49,16 +49,31 @@ impl ViewNode for RaytracingRenderNode {
 
         let post_process = view_target.post_process_write();
 
-        let meshes = world.resource::<ModelBuffer>();
+        // TODO buffer lock function
+        let meshes = world.resource::<MeshBuffer>();
         let mut mesh_buffer = meshes
             .lock()
-            .expect("could not get mesh buffer from mutex");
+            .expect("mesh buffer mutex is unexpectedly locked");
+
+        let vertices = world.resource::<VertexBuffer>();
+        let mut vertex_buffer = vertices
+            .lock()
+            .expect("vertex buffer mutex is unexpectedly locked");
+
+        let indices = world.resource::<IndexBuffer>();
+        let mut index_buffer = indices
+            .lock()
+            .expect("index buffer mutex is unexpectedly locked");
 
         let render_device = render_context.render_device();
         let render_queue = world.resource::<RenderQueue>();
         mesh_buffer.write_buffer(render_device, render_queue);
+        vertex_buffer.write_buffer(render_device, render_queue);
+        index_buffer.write_buffer(render_device, render_queue);
 
         let Some(mesh_buffer_binding) = mesh_buffer.binding() else { return Ok(()) };
+        let Some(vertex_buffer_binding) = vertex_buffer.binding() else { return Ok(()) };
+        let Some(index_buffer_binding) = index_buffer.binding() else { return Ok(()) };
 
         let bind_group = render_device.create_bind_group(
             "raytrace_bind_group",
@@ -76,6 +91,8 @@ impl ViewNode for RaytracingRenderNode {
             &raytracing_pipeline.buffer_layout,
             &BindGroupEntries::sequential((
                 mesh_buffer_binding,
+                vertex_buffer_binding,
+                index_buffer_binding,
             )),
         );
 

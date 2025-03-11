@@ -3,12 +3,40 @@ use bevy::prelude::*;
 use bevy::render::extract_component::ExtractComponent;
 use bevy::render::render_resource::ShaderType;
 use crate::render::{GpuRaytracingCamera, RaytracingCamera};
+use crate::types::{NEIndex, NEMesh, NEVertex};
 
-#[derive(Component, ShaderType, Clone)]
+#[derive(ShaderType)]
 pub struct GpuNEMesh {
     pub vertex_offset: u32,
     pub index_start: u32,
 }
+
+// #[derive(Component, Clone)]
+// pub struct ExtractedNEMesh {
+//     pub vertices: Vec<NEVertex>,
+//     pub indices: Vec<NEIndex>,
+// }
+//
+// impl ExtractComponent for ExtractedNEMesh {
+//     type QueryData = (
+//         &'static NEMesh,
+//         &'static GlobalTransform,
+//     );
+//     type QueryFilter = ();
+//     type Out = Self;
+//
+//     fn extract_component(item: QueryItem<'_, Self::QueryData>) -> Option<Self::Out> {
+//         let (mesh, global_transform) = item;
+//         Some(Self {
+//             vertices: mesh.vertices.iter().map(|v|
+//                 NEVertex {
+//                     cell: v.clone().cell,
+//                     pos: v.pos + global_transform.translation()
+//                 }).collect(),
+//             indices: mesh.indices.clone(),
+//         })
+//     }
+// }
 
 impl ExtractComponent for GpuRaytracingCamera {
     type QueryData = (

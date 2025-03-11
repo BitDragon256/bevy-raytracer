@@ -8,7 +8,9 @@
 
 @group(0) @binding(2) var<uniform> camera: RaytracingCamera;
 
-// @group(1) @binding(0) var mesh_buffer: array<NEMesh>;
+@group(1) @binding(0) var<storage, read> mesh_buffer: array<NEMesh>;
+@group(1) @binding(1) var<storage, read> vertex_buffer: array<NEVertex>;
+@group(1) @binding(2) var<storage, read> index_buffer: array<u32>;
 
 struct RaytracingCamera {
     bounces: u32,

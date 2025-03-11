@@ -5,9 +5,9 @@ use bevy::prelude::*;
 use bevy::render::extract_component::{ExtractComponent, ExtractComponentPlugin, UniformComponentPlugin};
 use bevy::render::render_graph::{RenderGraphApp, RenderLabel, ViewNodeRunner};
 use bevy::render::render_resource::ShaderType;
-use bevy::render::RenderApp;
+use bevy::render::{Render, RenderApp, RenderSet};
 use bevy::transform::helper::ComputeGlobalTransformError;
-use crate::buffer::ModelBuffer;
+use crate::buffer::{fill_buffers, IndexBuffer, MeshBuffer, VertexBuffer};
 use crate::extract::GpuNEMesh;
 use crate::pipeline::RaytracingPipeline;
 use crate::raytracing_render_node::{RaytraceLabel, RaytracingRenderNode};
@@ -80,7 +80,10 @@ impl Plugin for RaytracingPlugin {
             );
 
         // TODO own function to initialize buffers
-        render_app.init_resource::<ModelBuffer>();
+        render_app.init_resource::<MeshBuffer>();
+        render_app.init_resource::<VertexBuffer>();
+        render_app.init_resource::<IndexBuffer>();
+        render_app.add_systems(Render, fill_buffers.in_set(RenderSet::PrepareResources));
 
         println!(">> raytracing plugin build() done");
     }
