@@ -26,6 +26,7 @@ pub fn fill_buffers(
         all_meshes.push(GpuNEMesh {
             vertex_offset: vertices.len() as u32,
             index_start: indices.len() as u32,
+            index_count: mesh.indices.len() as u32,
         });
         vertices.append(&mut mesh.vertices);
         indices.append(&mut mesh.indices);

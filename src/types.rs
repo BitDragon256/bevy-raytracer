@@ -7,9 +7,15 @@ pub struct Cell {
     sockets: Vec<Socket>,
 }
 
-#[derive(ShaderType, Clone)]
+#[derive(ShaderType, Clone, Debug)]
 pub struct CellRef {
     index: u32,
+}
+
+impl CellRef {
+    pub fn new(index: u32) -> Self {
+        Self { index }
+    }
 }
 
 pub struct Socket {
@@ -22,10 +28,19 @@ pub struct SocketRef {
     index: u32,
 }
 
-#[derive(ShaderType, Clone)]
+#[derive(ShaderType, Clone, Debug)]
 pub struct NEVertex {
     pub pos: Vec3,
     pub cell: CellRef,
+}
+
+impl NEVertex {
+    pub fn new(x: f32, y: f32, z: f32, cell: CellRef) -> Self {
+        NEVertex {
+            pos: Vec3::new(x, y, z),
+            cell,
+        }
+    }
 }
 
 pub type NEIndex = u32;

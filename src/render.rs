@@ -11,11 +11,12 @@ use crate::buffer::{fill_buffers, IndexBuffer, MeshBuffer, VertexBuffer};
 use crate::extract::GpuNEMesh;
 use crate::pipeline::RaytracingPipeline;
 use crate::raytracing_render_node::{RaytraceLabel, RaytracingRenderNode};
+use crate::types::{CellRef, NEMesh, NEVertex};
 
 pub fn setup(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    // mut meshes: ResMut<Assets<Mesh>>,
+    // mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     commands.spawn((
         Camera3d::default(),
@@ -29,6 +30,20 @@ pub fn setup(
             samples: 1,
         }
     ));
+
+    commands.spawn((
+        Transform::from_translation(Vec3::ZERO),
+        NEMesh {
+            vertices: vec![
+                NEVertex::new(0.0, 0.0, 0.0, CellRef::new(0)),
+                NEVertex::new(0.0, 1.0, 0.0, CellRef::new(0)),
+                NEVertex::new(1.0, 0.0, 0.0, CellRef::new(0)),
+            ],
+            indices: vec![0, 1, 2,],
+        },
+    ));
+
+    println!(">> example scene set up");
 }
 
 #[derive(Component)]
@@ -60,7 +75,7 @@ impl Plugin for RaytracingPlugin {
             ExtractComponentPlugin::<GpuRaytracingCamera>::default(),
             UniformComponentPlugin::<GpuRaytracingCamera>::default(),
 
-            // ExtractComponentPlugin::<GpuNEMesh>::default(),
+            ExtractComponentPlugin::<NEMesh>::default(),
         ));
 
         let Some(render_app) = app.get_sub_app_mut(RenderApp) else { return; };

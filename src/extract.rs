@@ -9,6 +9,7 @@ use crate::types::{NEIndex, NEMesh, NEVertex};
 pub struct GpuNEMesh {
     pub vertex_offset: u32,
     pub index_start: u32,
+    pub index_count: u32,
 }
 
 // #[derive(Component, Clone)]
@@ -76,6 +77,17 @@ impl ExtractComponent for GpuRaytracingCamera {
                 }
             }
         };
+
+        // println!("camera:");
+        // println!("bounces: {}", camera.bounces);
+        // println!("samples: {}", camera.samples);
+        // println!("pos: {:?}", gpu_camera.pos);
+        // println!("dir: {:?}", gpu_camera.dir);
+        // println!("up: {:?}", gpu_camera.up);
+        // println!("aspect: {}", gpu_camera.aspect);
+        // println!("near: {}", gpu_camera.near);
+        // println!("far: {}", gpu_camera.far);
+        // println!("fov: {}", gpu_camera.fov);
 
         Some(gpu_camera)
     }
