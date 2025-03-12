@@ -43,10 +43,39 @@ impl NEVertex {
     }
 }
 
-pub type NEIndex = u32;
+#[derive(ShaderType, Clone)]
+pub struct NETriFace {
+    a: u32,
+    b: u32,
+    c: u32,
+    material_index: u32,
+}
+
+impl NETriFace {
+    pub fn new(a: u32, b: u32, c: u32, mat: u32) -> Self {
+        NETriFace {
+            a, b, c,
+            material_index: mat
+        }
+    }
+}
 
 #[derive(Component, ExtractComponent, Clone)]
 pub struct NEMesh {
     pub vertices: Vec<NEVertex>,
-    pub indices: Vec<u32>,
+    pub faces: Vec<NETriFace>,
+}
+
+// BSDF overview:
+// 0 -> diffuse
+// 1 -> phong
+// 2 -> ...
+
+#[derive(ShaderType, Component, ExtractComponent, Clone)]
+pub struct RaytracingMaterial {
+    pub bsdf: u32,
+    pub radiance: Vec3,
+    pub diffuse: Vec3,
+    pub specular: Vec3,
+    pub exponent: f32,
 }

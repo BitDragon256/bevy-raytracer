@@ -35,3 +35,24 @@ struct HitInfo {
     hit: bool,
     intersection: vec3<f32>,
 }
+
+struct Material {
+    bsdf: u32,
+    emitter: u32,
+    diffuse: vec3<f32>,
+    specular: vec3<f32>,
+    exponent: f32,
+}
+
+struct BSDFContext {
+    incident_dir: vec3<f32>,
+    outgoing_dir: vec3<f32>,
+    relative_refractive_index: f32,
+    uv: vec2<f32>,
+    color: vec3<f32>,
+}
+
+struct AreaEmitter {
+    surface_area: f32,
+    radiance: f32,
+}

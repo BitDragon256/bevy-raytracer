@@ -52,7 +52,13 @@ impl FromWorld for RaytracingPipeline {
                         has_dynamic_offset: false,
                         min_binding_size: None,
                     },
-                    // index buffer
+                    // triangle face buffer
+                    BindingType::Buffer {
+                        ty: BufferBindingType::Storage { read_only: true },
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    // material buffer
                     BindingType::Buffer {
                         ty: BufferBindingType::Storage { read_only: true },
                         has_dynamic_offset: false,

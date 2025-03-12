@@ -3,13 +3,13 @@ use bevy::prelude::*;
 use bevy::render::extract_component::ExtractComponent;
 use bevy::render::render_resource::ShaderType;
 use crate::render::{GpuRaytracingCamera, RaytracingCamera};
-use crate::types::{NEIndex, NEMesh, NEVertex};
+use crate::types::{NEMesh, NEVertex};
 
 #[derive(ShaderType)]
 pub struct GpuNEMesh {
     pub vertex_offset: u32,
-    pub index_start: u32,
-    pub index_count: u32,
+    pub face_start: u32,
+    pub face_count: u32,
 }
 
 // #[derive(Component, Clone)]

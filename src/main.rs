@@ -15,4 +15,6 @@ fn main() {
         .add_plugins((DefaultPlugins, RaytracingPlugin))
         .add_systems(Startup, setup)
         .run();
+
+    let a = 3 + 3;
 }

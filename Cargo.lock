@@ -314,6 +314,7 @@ name = "bevy-raytracer"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_flycam",
 ]
 
 [[package]]
@@ -574,6 +575,15 @@ checksum = "f37ad69d36bb9e8479a88d481ef9748f5d7ab676040531d751d3a44441dcede7"
 dependencies = [
  "bevy_macro_utils",
  "encase_derive_impl",
+]
+
+[[package]]
+name = "bevy_flycam"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "83039a8e4f7e92c96c97b0b3ac738a54781f77ce5086d3ae39698219586a7f1d"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]

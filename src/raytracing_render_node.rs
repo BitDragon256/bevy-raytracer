@@ -6,7 +6,7 @@ use bevy::render::render_graph::{NodeRunError, RenderGraphContext, RenderLabel, 
 use bevy::render::render_resource::{BindGroupEntries, Operations, PipelineCache, RenderPassColorAttachment, RenderPassDescriptor};
 use bevy::render::renderer::{RenderContext, RenderQueue};
 use bevy::render::view::ViewTarget;
-use crate::buffer::{IndexBuffer, MeshBuffer, VertexBuffer};
+use crate::buffer::{TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer};
 use crate::pipeline::RaytracingPipeline;
 use crate::render::GpuRaytracingCamera;
 
@@ -60,20 +60,27 @@ impl ViewNode for RaytracingRenderNode {
             .lock()
             .expect("vertex buffer mutex is unexpectedly locked");
 
-        let indices = world.resource::<IndexBuffer>();
-        let mut index_buffer = indices
+        let tri_faces = world.resource::<TriFaceBuffer>();
+        let mut tri_face_buffer = tri_faces
             .lock()
             .expect("index buffer mutex is unexpectedly locked");
+
+        let materials = world.resource::<MaterialBuffer>();
+        let mut material_buffer = materials
+            .lock()
+            .expect("material buffer mutex is unexpectedly locked");
 
         let render_device = render_context.render_device();
         let render_queue = world.resource::<RenderQueue>();
         mesh_buffer.write_buffer(render_device, render_queue);
         vertex_buffer.write_buffer(render_device, render_queue);
-        index_buffer.write_buffer(render_device, render_queue);
+        tri_face_buffer.write_buffer(render_device, render_queue);
+        material_buffer.write_buffer(render_device, render_queue);
 
         let Some(mesh_buffer_binding) = mesh_buffer.binding() else { return Ok(()) };
         let Some(vertex_buffer_binding) = vertex_buffer.binding() else { return Ok(()) };
-        let Some(index_buffer_binding) = index_buffer.binding() else { return Ok(()) };
+        let Some(tri_face_buffer) = tri_face_buffer.binding() else { return Ok(()) };
+        let Some(material_buffer_binding) = material_buffer.binding() else { return Ok(()) };
 
         let bind_group = render_device.create_bind_group(
             "raytrace_bind_group",
@@ -92,7 +99,8 @@ impl ViewNode for RaytracingRenderNode {
             &BindGroupEntries::sequential((
                 mesh_buffer_binding,
                 vertex_buffer_binding,
-                index_buffer_binding,
+                tri_face_buffer,
+                material_buffer_binding,
             )),
         );
 
