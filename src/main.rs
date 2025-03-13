@@ -9,6 +9,7 @@ mod bvh;
 mod extract;
 mod mesh;
 mod buffer;
+mod scene;
 
 fn main() {
     App::new()

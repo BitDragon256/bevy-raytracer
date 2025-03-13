@@ -75,7 +75,15 @@ pub struct NEMesh {
 pub struct RaytracingMaterial {
     pub bsdf: u32,
     pub radiance: Vec3,
-    pub diffuse: Vec3,
+    pub albedo: Vec3,
     pub specular: Vec3,
     pub exponent: f32,
+}
+
+pub fn string_to_bsdf(name: &str) -> u32 {
+    match name {
+        "diffuse" => 0,
+        "phong" => 1,
+        _ => 0
+    }
 }

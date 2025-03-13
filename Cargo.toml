@@ -6,3 +6,7 @@ edition = "2021"
 [dependencies]
 bevy = "0.15.3"
 bevy_flycam = "0.15"
+bevy-fps-counter = "*"
+
+obj-rs = "0.7"
+serde_json = "1.0"

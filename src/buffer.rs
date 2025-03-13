@@ -32,6 +32,7 @@ pub fn fill_buffers(
             vertex_offset: vertices.len() as u32,
             face_start: tri_faces.len() as u32,
             face_count: mesh.faces.len() as u32,
+            material_offset: materials.len() as u32,
         });
         vertices.append(&mut mesh.vertices);
         tri_faces.append(&mut mesh.faces);

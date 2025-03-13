@@ -72,6 +72,7 @@ struct NEMesh {
     vertex_offset: u32,
     face_start: u32,
     face_count: u32,
+    material_offset: u32,
 }
 struct NEVertex {
     position: vec3f,
@@ -98,12 +99,13 @@ struct HitInfo {
     normal: vec3f,
     distance: f32,
     face_index: u32,
+    material_index: u32,
 }
 
 struct Material {
     bsdf: u32,
     radiance: vec3f, // TODO seperate area light
-    diffuse: vec3f,
+    albedo: vec3f,
     specular: vec3f,
     exponent: f32,
 }
@@ -167,6 +169,7 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
         if tri_hit_info.hit && tri_hit_info.distance < nearest_hit_info.distance {
             nearest_hit_info = tri_hit_info;
             nearest_hit_info.face_index = face_index;
+            nearest_hit_info.material_index = face.material_index + mesh.material_offset;
         }
     }
     return nearest_hit_info;
@@ -231,7 +234,7 @@ fn phong_eval(context: BSDFContext, material: Material) -> vec3f {
     if alpha > 0.0 {
         spec_pdf = pow(alpha, material.exponent) * (material.exponent + 1.0) * INV_TWOPI;
     }
-    return material.diffuse * INV_PI + material.specular * spec_pdf;
+    return material.albedo * INV_PI + material.specular * spec_pdf;
 }
 fn phong_pdf(context: BSDFContext, material: Material) -> f32 {
     let alpha = dot(context.outgoing_dir, reflect(context.incident_dir));
@@ -286,10 +289,10 @@ fn phong_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> B
 }
 
 fn sample_bsdf(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> BSDFContext {
-    if material.bsdf == 1 {
+    // if material.bsdf == 1 {
         return phong_sample(incident_dir, rng_sample, material);
-    }
-    return BSDFContext();
+    // }
+    // return BSDFContext();
 }
 
 fn trace_ray(ray: Ray) -> HitInfo {
@@ -351,10 +354,10 @@ fn next_random_2d(state: ptr<function, RngState>) -> vec2f {
 }
 fn uv_to_rng_state(uv: vec2f) -> RngState {
     return RngState(
-        bitcast<u32>(fract(fract(dot(uv, vec2f(12.9898, 78.2338))) * 43758.5453123)),
-        bitcast<u32>(fract(fract(dot(uv, vec2f(91.4435, 42.1895))) * 15512.5037034)),
-        bitcast<u32>(fract(fract(dot(uv, vec2f(83.9575, 67.0150))) * 32739.7101972)),
-        bitcast<u32>(fract(fract(dot(uv, vec2f(39.6784, 53.7602))) * 77672.1025434)),
+        bitcast<u32>(fract(sin(dot(uv, vec2f(12.9898, 78.2338))) * 43758.5453123)),
+        bitcast<u32>(fract(sin(dot(uv, vec2f(91.4435, 42.1895))) * 15512.5037034)),
+        bitcast<u32>(fract(sin(dot(uv, vec2f(83.9575, 67.0150))) * 32739.7101972)),
+        bitcast<u32>(fract(sin(dot(uv, vec2f(39.6784, 53.7602))) * 77672.1025434)),
     );
 }
 
@@ -363,10 +366,6 @@ fn is_emitter(material: Material) -> bool {
 }
 fn eval_emitter(incident_dir: vec3f, material: Material) -> vec3f {
     return material.radiance * cos_theta(incident_dir);
-}
-
-fn get_material(face_index: u32) -> Material {
-    return material_buffer[tri_face_buffer[face_index].material_index];
 }
 
 fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
@@ -383,7 +382,7 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
         let local_frame = create_frame(hit_info.normal);
         let incident_dir = to_local(-ray.direction, local_frame);
 
-        let material = get_material(hit_info.face_index);
+        let material = material_buffer[hit_info.material_index];
 
         let bsdf_context = sample_bsdf(incident_dir, next_random_2d(rng_state), material);
 
@@ -401,5 +400,9 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
 @fragment
 fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4f {
     var rng_state = uv_to_rng_state(in.uv);
-    return vec4f(eval_bsdf_path(ray_from_uv(in.uv), &rng_state), 1.0);
+    var color = vec3f(0.0);
+    for (var sample_index = 0u; sample_index < camera.samples; sample_index++) {
+        color += eval_bsdf_path(ray_from_uv(in.uv), &rng_state);
+    }
+    return vec4f(color / f32(camera.samples), 1.0);
 }

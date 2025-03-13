@@ -10,6 +10,7 @@ pub struct GpuNEMesh {
     pub vertex_offset: u32,
     pub face_start: u32,
     pub face_count: u32,
+    pub material_offset: u32,
 }
 
 // #[derive(Component, Clone)]
