@@ -114,7 +114,7 @@ impl Plugin for RaytracingPlugin {
             ))
             .insert_resource(MovementSettings {
                 sensitivity: 0.00010,
-                speed: 40.0,
+                speed: 180.0,
             });
 
         app.add_plugins((

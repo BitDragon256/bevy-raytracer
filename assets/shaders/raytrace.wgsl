@@ -136,7 +136,7 @@ fn square_to_uniform_disk(v: vec2f) -> vec2f {
     let r = sqrt(v.y);
 
     // TODO find more efficient way to calculate this
-    return vec2f(r * cos(theta), r * sin(theta));
+    return vec2f(cos(theta), sin(theta)) * r;
 }
 fn square_to_cosine_hemisphere(v: vec2f) -> vec3f {
     let disk = square_to_uniform_disk(v);
@@ -205,7 +205,7 @@ fn create_frame(n: vec3f) -> Frame {
     var f = Frame();
     f.n = n;
 
-    if n.x > n.y {
+    if abs(n.x) > abs(n.y) {
         f.v = vec3f(n.z, 0.0, -n.x) / length(n.xz);
     } else {
         f.v = vec3f(0.0, n.z, -n.y) / length(n.yz);
@@ -288,20 +288,53 @@ fn phong_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> B
     return context;
 }
 
+fn diffuse_eval(context: BSDFContext, material: Material) -> vec3f {
+    if cos_theta(context.incident_dir) <= 0 || cos_theta(context.outgoing_dir) <= 0 {
+        return vec3f(0.0);
+    }
+    return material.albedo * INV_PI;
+}
+fn diffuse_pdf(context: BSDFContext, material: Material) -> f32 {
+    if cos_theta(context.incident_dir) <= 0 || cos_theta(context.outgoing_dir) <= 0 {
+        return 0.0;
+    }
+    return INV_PI * cos_theta(context.outgoing_dir);
+}
+fn diffuse_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> BSDFContext {
+    var context = BSDFContext();
+    context.incident_dir = incident_dir;
+
+    if cos_theta(incident_dir) <= 0.0 {
+        context.color = vec3f(0.0);
+        return context;
+    }
+
+    context.outgoing_dir = square_to_cosine_hemisphere(rng_sample);
+    context.color = material.albedo;
+    context.relative_refractive_index = 1.0;
+
+    return context;
+}
+
 fn sample_bsdf(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> BSDFContext {
-    // if material.bsdf == 1 {
+    if material.bsdf == 0 {
+        return diffuse_sample(incident_dir, rng_sample, material);
+    } else if material.bsdf == 1 {
         return phong_sample(incident_dir, rng_sample, material);
-    // }
-    // return BSDFContext();
+    }
+    return BSDFContext();
 }
 
 fn trace_ray(ray: Ray) -> HitInfo {
     var nearest_hit_info = HitInfo();
     nearest_hit_info.distance = INF;
 
+    // move origin slightly to eliminate rounding errors
+    let mod_ray = Ray(ray.origin + ray.direction * 0.01, ray.direction);
+
     for (var mesh_index: u32 = 0; mesh_index < arrayLength(&mesh_buffer); mesh_index += 1u) {
         let mesh = mesh_buffer[mesh_index];
-        let mesh_hit_info = intersect_mesh(ray, mesh);
+        let mesh_hit_info = intersect_mesh(mod_ray, mesh);
         if mesh_hit_info.hit && mesh_hit_info.distance < nearest_hit_info.distance {
             nearest_hit_info = mesh_hit_info;
         }
@@ -354,10 +387,10 @@ fn next_random_2d(state: ptr<function, RngState>) -> vec2f {
 }
 fn uv_to_rng_state(uv: vec2f) -> RngState {
     return RngState(
-        bitcast<u32>(fract(sin(dot(uv, vec2f(12.9898, 78.2338))) * 43758.5453123)),
-        bitcast<u32>(fract(sin(dot(uv, vec2f(91.4435, 42.1895))) * 15512.5037034)),
-        bitcast<u32>(fract(sin(dot(uv, vec2f(83.9575, 67.0150))) * 32739.7101972)),
-        bitcast<u32>(fract(sin(dot(uv, vec2f(39.6784, 53.7602))) * 77672.1025434)),
+        bitcast<u32>(fract(sin(dot(uv.xy, vec2f(12.9898, 78.2338))) * 43758.5453123)),
+        bitcast<u32>(fract(sin(dot(camera.position.xz, vec2f(91.4435, 42.1895))) * 15512.5037034)),
+        bitcast<u32>(fract(sin(dot(camera.position.yz, vec2f(83.9575, 67.0150))) * 32739.7101972)),
+        bitcast<u32>(fract(sin(dot(uv.yx, vec2f(39.6784, 53.7602))) * 77672.1025434)),
     );
 }
 
@@ -378,7 +411,7 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
         if !hit_info.hit {
             break;
         }
-        
+
         let local_frame = create_frame(hit_info.normal);
         let incident_dir = to_local(-ray.direction, local_frame);
 
@@ -392,6 +425,8 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
 
         throughput *= bsdf_context.color;
         ray = Ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
+
+        // return ray.direction * 0.5 + vec3f(0.5);
     }
 
     return radiance;
