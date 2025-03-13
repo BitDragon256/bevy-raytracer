@@ -125,6 +125,8 @@ const INV_PI: f32 = 0.31830988618379067154;
 const INV_TWOPI: f32 = 0.15915494309189533577;
 const EPSILON: f32 = 0.000001;
 const INF: f32 = 3.40282347e+38;
+const RAD2DEG: f32 = 180.0 * INV_PI;
+const DEG2RAD: f32 = PI / 180.0;
 
 // #import "shaders/warp.wgsl"::{square_to_cosine_hemisphere_pdf, square_to_cosine_hemisphere, square_to_uniform_disk}
 // WARP.wgsl
@@ -181,7 +183,8 @@ fn ray_from_uv(uv: vec2f) -> Ray {
         1.0 - uv.y * 2.0,
     );
     let right = cross(camera.direction, camera.up);
-    let dir = normalize(camera.direction + (delta.x * camera.aspect * right) + (delta.y * camera.up));
+    let scale = tan(camera.fov * DEG2RAD * 0.5);
+    let dir = normalize(camera.direction + (delta.x * camera.aspect * scale * right) + (delta.y * scale * camera.up));
     return Ray(camera.position, dir);
 }
 

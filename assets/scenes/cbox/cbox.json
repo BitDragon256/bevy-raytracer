@@ -5,16 +5,16 @@
     "up": [0, 1, 0],
 
     "fov": 39.3077,
-    "sample_count": 256,
+    "sample_count": 128,
     "sampler": "independent",
-    "max_bounces": 2,
+    "max_bounces": 10,
     "min_bounces": 3
   },
   "meshes": [
     {
       "object": "meshes/cbox_emitter.obj",
       "bsdf": {
-        "type": "diffuse",
+        "type": "phong",
         "albedo": [0.78, 0.78, 0.78],
         "radiance": [15, 15, 15]
       },
@@ -25,35 +25,35 @@
     {
       "object": "meshes/cbox_floor.obj",
       "bsdf": {
-        "type": "diffuse",
+        "type": "phong",
         "albedo": [0.75, 0.75, 0.75]
       }
     },
     {
       "object": "meshes/cbox_ceiling.obj",
       "bsdf": {
-        "type": "diffuse",
+        "type": "phong",
         "albedo": [0.75, 0.75, 0.75]
       }
     },
     {
       "object": "meshes/cbox_backwall.obj",
       "bsdf": {
-        "type": "diffuse",
+        "type": "phong",
         "albedo": [0.75, 0.75, 0.75]
       }
     },
     {
       "object": "meshes/cbox_rightwall.obj",
       "bsdf": {
-        "type": "diffuse",
+        "type": "phong",
         "albedo": [0.117, 0.373, 0.100]
       }
     },
     {
       "object": "meshes/cbox_leftwall.obj",
       "bsdf": {
-        "type": "diffuse",
+        "type": "phong",
         "albedo": [0.61, 0.62, 0.06]
       }
     }
