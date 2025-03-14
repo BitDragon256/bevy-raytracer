@@ -5,9 +5,9 @@
     "up": [0, 1, 0],
 
     "fov": 39.3077,
-    "sample_count": 128,
+    "sample_count": 32,
     "sampler": "independent",
-    "max_bounces": 5,
+    "max_bounces": 10,
     "min_bounces": 3
   },
   "meshes": [

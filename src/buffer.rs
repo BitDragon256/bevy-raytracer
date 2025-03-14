@@ -1,4 +1,4 @@
-use bevy::prelude::{Deref, Entity, EntityRef, GlobalTransform, Query, Res, Resource, Transform, World};
+use bevy::prelude::{Deref, Entity, EntityRef, GlobalTransform, Query, Res, ResMut, Resource, Transform, World};
 use bevy::render::render_resource::StorageBuffer;
 use crate::extract::{GpuBvhNode, GpuNEMesh, GpuTransform};
 use crate::types::{NEVertex, NEMesh, RaytracingMaterial, NETriFace};
@@ -26,6 +26,21 @@ pub struct MaterialBuffer(std::sync::Mutex<StorageBuffer<Vec<RaytracingMaterial>
 #[derive(Resource, Deref, Default)]
 pub struct TransformBuffer(std::sync::Mutex<StorageBuffer<Vec<GpuTransform>>>);
 
+#[derive(Resource)]
+pub struct BufferCache {
+    pub pushed: bool,
+    pub iters: i32,
+}
+
+impl Default for BufferCache {
+    fn default() -> Self {
+        Self {
+            pushed: false,
+            iters: 10,
+        }
+    }
+}
+
 pub fn fill_buffers(
     model_buffer: Res<MeshBuffer>,
     // hlas_buffer: Res<HighLevelAccelerationStructureBuffer>,
@@ -34,8 +49,17 @@ pub fn fill_buffers(
     tri_face_buffer: Res<TriFaceBuffer>,
     material_buffer: Res<MaterialBuffer>,
     transform_buffer: Res<TransformBuffer>,
+    mut buffer_cache: ResMut<BufferCache>,
     mut meshes: Query<(&mut NEMesh, &RaytracingMaterial, &GpuTransform)>,
 ) {
+    if buffer_cache.iters <= 0 {
+        return;
+    } else {
+        // buffer_cache.pushed = true;
+        buffer_cache.iters -= 1;
+        // println!("iterations remaining: {}", buffer_cache.iters);
+    }
+
     let mut all_meshes = Vec::new();
     let mut gpu_bvh = Vec::new();
     let mut vertices = Vec::new();

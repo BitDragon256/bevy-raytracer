@@ -65,7 +65,10 @@ fn intersect_aabb(ray_origin: vec3f, ray_inv_dir: vec3f, box_min: vec3f, box_max
 // TYPES.wgsl
 
 struct RaytracingCamera {
-    bounces: u32,
+    min_bounces: u32,
+    max_bounces: u32,
+    bounce_probability: f32,
+
     samples: u32,
 
     position: vec3f,
@@ -474,13 +477,10 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
     var radiance = vec3f(0.0);
     var ray = in_ray;
 
-    for (var bounce = 0u; bounce < camera.bounces; bounce++) {
+    for (var bounce = 0u; bounce < camera.max_bounces; bounce++) {
         let hit_info = trace_ray(ray);
         if !hit_info.hit {
             break;
-        } else {
-            // return hit_info.normal * 0.5 + vec3f(0.5);
-            // return vec3f(f32(hit_info.material_index) / f32(arrayLength(&material_buffer)));
         }
 
         let local_frame = create_frame(hit_info.normal);
@@ -494,10 +494,17 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
             radiance += eval_emitter(incident_dir, material) * throughput;
         }
 
-        throughput *= bsdf_context.color;
-        ray = Ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
+        var probability_to_die = max(0.01, length(bsdf_context.color));
+        if bounce >= camera.min_bounces {
+            if next_random(rng_state) > probability_to_die {
+                break;
+            }
+        } else {
+            probability_to_die = 1.0;
+        }
 
-        // return ray.direction * 0.5 + vec3f(0.5);
+        throughput *= bsdf_context.color / probability_to_die;
+        ray = Ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
     }
 
     return radiance;

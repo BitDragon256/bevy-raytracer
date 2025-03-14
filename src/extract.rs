@@ -92,7 +92,9 @@ impl ExtractComponent for GpuRaytracingCamera {
                 far
             }) => {
                 GpuRaytracingCamera {
-                    bounces: camera.bounces,
+                    min_bounces: camera.min_bounces,
+                    max_bounces: camera.max_bounces,
+                    bounce_probability: camera.bounce_probability,
                     samples: camera.samples,
                     pos: global_transform.translation(),
                     dir: global_transform.forward().as_vec3(),

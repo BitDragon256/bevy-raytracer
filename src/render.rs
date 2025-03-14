@@ -9,7 +9,7 @@ use bevy::render::{Render, RenderApp, RenderSet};
 use bevy_flycam::{FlyCam, MovementSettings, NoCameraPlayerPlugin};
 use bevy_fps_counter::{FpsCounter, FpsCounterPlugin};
 
-use crate::buffer::{fill_buffers, TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer, LowLevelAccelerationStructureBuffer, TransformBuffer};
+use crate::buffer::{fill_buffers, TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer, LowLevelAccelerationStructureBuffer, TransformBuffer, BufferCache};
 use crate::extract::GpuTransform;
 use crate::pipeline::RaytracingPipeline;
 use crate::raytracing_render_node::{RaytraceLabel, RaytracingRenderNode};
@@ -84,13 +84,19 @@ pub fn setup(
 
 #[derive(Component)]
 pub struct RaytracingCamera {
-    pub bounces: u32,
+    pub min_bounces: u32,
+    pub max_bounces: u32,
+    pub bounce_probability: f32,
+
     pub samples: u32,
 }
 
 #[derive(Component, ShaderType, Clone, Default)]
 pub struct GpuRaytracingCamera {
-    pub bounces: u32,
+    pub min_bounces: u32,
+    pub max_bounces: u32,
+    pub bounce_probability: f32,
+
     pub samples: u32,
 
     pub pos: Vec3,
@@ -150,6 +156,8 @@ impl Plugin for RaytracingPlugin {
         render_app.init_resource::<TriFaceBuffer>();
         render_app.init_resource::<MaterialBuffer>();
         render_app.init_resource::<TransformBuffer>();
+
+        render_app.init_resource::<BufferCache>();
 
         render_app.add_systems(Render, fill_buffers.in_set(RenderSet::PrepareResources));
 

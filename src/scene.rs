@@ -95,7 +95,9 @@ pub fn load_scene(
                     ..default()
                 },
                 RaytracingCamera {
-                    bounces: max_bounces,
+                    min_bounces,
+                    max_bounces,
+                    bounce_probability: 0.9,
                     samples: sample_count,
                 },
                 FlyCam
