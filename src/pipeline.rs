@@ -46,6 +46,12 @@ impl FromWorld for RaytracingPipeline {
                         has_dynamic_offset: false,
                         min_binding_size: None,
                     },
+                    // llas buffer
+                    BindingType::Buffer {
+                        ty: BufferBindingType::Storage { read_only: true },
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
                     // vertex buffer
                     BindingType::Buffer {
                         ty: BufferBindingType::Storage { read_only: true },
@@ -59,6 +65,12 @@ impl FromWorld for RaytracingPipeline {
                         min_binding_size: None,
                     },
                     // material buffer
+                    BindingType::Buffer {
+                        ty: BufferBindingType::Storage { read_only: true },
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    // transform buffer
                     BindingType::Buffer {
                         ty: BufferBindingType::Storage { read_only: true },
                         has_dynamic_offset: false,

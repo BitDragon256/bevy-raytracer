@@ -2,9 +2,11 @@ use bevy::math::Vec3;
 use bevy::prelude::{Component, Mesh};
 use bevy::render::extract_component::ExtractComponent;
 use bevy::render::render_resource::ShaderType;
+use bvh::bvh::Bvh;
 
 pub struct Cell {
     sockets: Vec<Socket>,
+    bvh: Bvh<f32, 3>,
 }
 
 #[derive(ShaderType, Clone, Debug)]
@@ -43,20 +45,27 @@ impl NEVertex {
     }
 }
 
-#[derive(ShaderType, Clone)]
+#[derive(ShaderType, Clone, Debug)]
 pub struct NETriFace {
-    a: u32,
-    b: u32,
-    c: u32,
+    pub a: u32,
+    pub b: u32,
+    pub c: u32,
     material_index: u32,
+    bvh_index: u32,
 }
 
 impl NETriFace {
     pub fn new(a: u32, b: u32, c: u32, mat: u32) -> Self {
         NETriFace {
             a, b, c,
-            material_index: mat
+            material_index: mat,
+            bvh_index: u32::MAX,
         }
+    }
+    pub fn with_bvh_index(&self, index: u32) -> Self {
+        let mut face = self.clone();
+        face.bvh_index = index;
+        face
     }
 }
 
@@ -64,6 +73,7 @@ impl NETriFace {
 pub struct NEMesh {
     pub vertices: Vec<NEVertex>,
     pub faces: Vec<NETriFace>,
+    pub bvh: Bvh<f32, 3>,
 }
 
 // BSDF overview:

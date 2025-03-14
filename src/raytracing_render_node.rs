@@ -3,10 +3,10 @@ use bevy::ecs::query::QueryItem;
 use bevy::prelude::{FromWorld, World};
 use bevy::render::extract_component::{ComponentUniforms, DynamicUniformIndex};
 use bevy::render::render_graph::{NodeRunError, RenderGraphContext, RenderLabel, ViewNode};
-use bevy::render::render_resource::{BindGroupEntries, Operations, PipelineCache, RenderPassColorAttachment, RenderPassDescriptor};
+use bevy::render::render_resource::{AsBindGroupShaderType, BindGroupEntries, Operations, PipelineCache, RenderPassColorAttachment, RenderPassDescriptor};
 use bevy::render::renderer::{RenderContext, RenderQueue};
 use bevy::render::view::ViewTarget;
-use crate::buffer::{TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer};
+use crate::buffer::{TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer, LowLevelAccelerationStructureBuffer, TransformBuffer};
 use crate::pipeline::RaytracingPipeline;
 use crate::render::GpuRaytracingCamera;
 
@@ -55,6 +55,11 @@ impl ViewNode for RaytracingRenderNode {
             .lock()
             .expect("mesh buffer mutex is unexpectedly locked");
 
+        let bvhs = world.resource::<LowLevelAccelerationStructureBuffer>();
+        let mut llas_buffer = bvhs
+            .lock()
+            .expect("low level acceleration structure mutex is unexpectedly locked");
+
         let vertices = world.resource::<VertexBuffer>();
         let mut vertex_buffer = vertices
             .lock()
@@ -70,17 +75,27 @@ impl ViewNode for RaytracingRenderNode {
             .lock()
             .expect("material buffer mutex is unexpectedly locked");
 
+        let transforms = world.resource::<TransformBuffer>();
+        let mut transform_buffer = transforms
+            .lock()
+            .expect("transform buffer mutex is unexpectedly locked");
+
         let render_device = render_context.render_device();
         let render_queue = world.resource::<RenderQueue>();
+
         mesh_buffer.write_buffer(render_device, render_queue);
+        llas_buffer.write_buffer(render_device, render_queue);
         vertex_buffer.write_buffer(render_device, render_queue);
         tri_face_buffer.write_buffer(render_device, render_queue);
         material_buffer.write_buffer(render_device, render_queue);
+        transform_buffer.write_buffer(render_device, render_queue);
 
         let Some(mesh_buffer_binding) = mesh_buffer.binding() else { return Ok(()) };
+        let Some(llas_buffer_binding) = llas_buffer.binding() else { return Ok(()) };
         let Some(vertex_buffer_binding) = vertex_buffer.binding() else { return Ok(()) };
         let Some(tri_face_buffer) = tri_face_buffer.binding() else { return Ok(()) };
         let Some(material_buffer_binding) = material_buffer.binding() else { return Ok(()) };
+        let Some(transform_buffer_binding) = transform_buffer.binding() else { return Ok(()) };
 
         let bind_group = render_device.create_bind_group(
             "raytrace_bind_group",
@@ -98,9 +113,11 @@ impl ViewNode for RaytracingRenderNode {
             &raytracing_pipeline.buffer_layout,
             &BindGroupEntries::sequential((
                 mesh_buffer_binding,
+                llas_buffer_binding,
                 vertex_buffer_binding,
                 tri_face_buffer,
                 material_buffer_binding,
+                transform_buffer_binding,
             )),
         );
 

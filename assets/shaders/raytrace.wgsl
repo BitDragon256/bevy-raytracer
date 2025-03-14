@@ -42,6 +42,16 @@ fn intersect_triangle(ray: Ray, a: vec3f, b: vec3f, c: vec3f) -> HitInfo {
 	return intersection;
 }
 
+fn intersect_aabb(ray_origin: vec3f, ray_inv_dir: vec3f, box_min: vec3f, box_max: vec3f) -> bool {
+    let t1 = (box_min - ray_origin) * ray_inv_dir;
+    let t2 = (box_max - ray_origin) * ray_inv_dir;
+
+    let tmin = max(max(min(t1.x, t2.x), min(t1.y, t2.y)), min(t1.z, t2.z));
+    let tmax = min(min(max(t1.x, t2.x), max(t1.y, t2.y)), max(t1.z, t2.z));
+
+    return tmax >= tmin && tmax > 0;
+}
+
 // #import "shaders/types.wgsl"::{
 //     RaytracingCamera,
 //     NEMesh,
@@ -70,9 +80,11 @@ struct RaytracingCamera {
 
 struct NEMesh {
     vertex_offset: u32,
-    face_start: u32,
-    face_count: u32,
+    face_offset: u32,
+    bvh_root: u32,
+    bvh_size: u32,
     material_offset: u32,
+    transform_index: u32,
 }
 struct NEVertex {
     position: vec3f,
@@ -82,6 +94,15 @@ struct NEVertex {
 struct NETriFace {
     a: u32, b: u32, c: u32,
     material_index: u32,
+    bvh_index: u32,
+}
+
+struct BvhNode {
+    min: vec3f,
+    max: vec3f,
+    entry_index: u32,
+    exit_index: u32,
+    shape_index: u32,
 }
 
 struct CellRef {
@@ -118,6 +139,10 @@ struct BSDFContext {
     color: vec3f,
 }
 
+struct Transform {
+    matrix: mat4x4f,
+}
+
 // #import "shaders/const.wgsl"::{INV_PI, INV_TWOPI}
 // CONST.wgsl
 const PI: f32 = 3.14159265358979323846;
@@ -125,6 +150,7 @@ const INV_PI: f32 = 0.31830988618379067154;
 const INV_TWOPI: f32 = 0.15915494309189533577;
 const EPSILON: f32 = 0.000001;
 const INF: f32 = 3.40282347e+38;
+const U32_MAX: u32 = 4294967295u;
 const RAD2DEG: f32 = 180.0 * INV_PI;
 const DEG2RAD: f32 = PI / 180.0;
 
@@ -153,27 +179,66 @@ fn square_to_cosine_hemisphere(v: vec2f) -> vec3f {
 @group(0) @binding(2) var<uniform> camera: RaytracingCamera;
 
 @group(1) @binding(0) var<storage, read> mesh_buffer: array<NEMesh>;
-@group(1) @binding(1) var<storage, read> vertex_buffer: array<NEVertex>;
-@group(1) @binding(2) var<storage, read> tri_face_buffer: array<NETriFace>;
-@group(1) @binding(3) var<storage, read> material_buffer: array<Material>;
+@group(1) @binding(1) var<storage, read> llas_buffer: array<BvhNode>;
+@group(1) @binding(2) var<storage, read> vertex_buffer: array<NEVertex>;
+@group(1) @binding(3) var<storage, read> tri_face_buffer: array<NETriFace>;
+@group(1) @binding(4) var<storage, read> material_buffer: array<Material>;
+@group(1) @binding(5) var<storage, read> transform_buffer: array<Transform>;
+
+fn apply_transform(transform: Transform, v: vec3f) -> vec3f {
+    return (transform.matrix * vec4f(v, 1.0)).xyz;
+}
 
 fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
     var nearest_hit_info = HitInfo();
     nearest_hit_info.distance = INF;
 
-    for (var face_index = mesh.face_start; face_index < mesh.face_start + mesh.face_count; face_index++) {
-        let face = tri_face_buffer[face_index];
-        let a = vertex_buffer[face.a + mesh.vertex_offset].position;
-        let b = vertex_buffer[face.b + mesh.vertex_offset].position;
-        let c = vertex_buffer[face.c + mesh.vertex_offset].position;
-        let tri_hit_info = intersect_triangle(ray, a, b, c);
+    let transform = transform_buffer[mesh.transform_index];
 
-        if tri_hit_info.hit && tri_hit_info.distance < nearest_hit_info.distance {
-            nearest_hit_info = tri_hit_info;
-            nearest_hit_info.face_index = face_index;
-            nearest_hit_info.material_index = face.material_index + mesh.material_offset;
+    let inv_ray_dir = 1.0 / ray.direction;
+
+    let bvh_offset = mesh.bvh_root;
+    var bvh_index = 0u;
+
+    while bvh_index < mesh.bvh_size {
+        let bvh_node = llas_buffer[bvh_index + bvh_offset];
+
+        if bvh_node.entry_index == U32_MAX { // leaf node
+            let face = tri_face_buffer[bvh_node.shape_index + mesh.face_offset];
+            let a = apply_transform(transform, vertex_buffer[face.a + mesh.vertex_offset].position);
+            let b = apply_transform(transform, vertex_buffer[face.b + mesh.vertex_offset].position);
+            let c = apply_transform(transform, vertex_buffer[face.c + mesh.vertex_offset].position);
+            let tri_hit_info = intersect_triangle(ray, a, b, c);
+
+            if tri_hit_info.hit && tri_hit_info.distance < nearest_hit_info.distance {
+                nearest_hit_info = tri_hit_info;
+                nearest_hit_info.face_index = bvh_node.shape_index + mesh.face_offset;
+                nearest_hit_info.material_index = face.material_index + mesh.material_offset;
+            }
+
+            bvh_index = bvh_node.exit_index;
+        }
+        else if intersect_aabb(ray.origin, inv_ray_dir, apply_transform(transform, bvh_node.min), apply_transform(transform, bvh_node.max)) {
+            bvh_index = bvh_node.entry_index;
+        } else {
+            bvh_index = bvh_node.exit_index;
         }
     }
+
+    // for (var face_index = mesh.face_start; face_index < mesh.face_start + mesh.face_count; face_index++) {
+    //     let face = tri_face_buffer[face_index];
+    //     let a = vertex_buffer[face.a + mesh.vertex_offset].position;
+    //     let b = vertex_buffer[face.b + mesh.vertex_offset].position;
+    //     let c = vertex_buffer[face.c + mesh.vertex_offset].position;
+    //     let tri_hit_info = intersect_triangle(ray, a, b, c);
+
+    //     if tri_hit_info.hit && tri_hit_info.distance < nearest_hit_info.distance {
+    //         nearest_hit_info = tri_hit_info;
+    //         nearest_hit_info.face_index = face_index;
+    //         nearest_hit_info.material_index = face.material_index + mesh.material_offset;
+    //     }
+    // }
+
     return nearest_hit_info;
 }
 
@@ -413,6 +478,9 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
         let hit_info = trace_ray(ray);
         if !hit_info.hit {
             break;
+        } else {
+            // return hit_info.normal * 0.5 + vec3f(0.5);
+            // return vec3f(f32(hit_info.material_index) / f32(arrayLength(&material_buffer)));
         }
 
         let local_frame = create_frame(hit_info.normal);

@@ -46,14 +46,14 @@ fn load_object(filename: &str) -> NEMesh {
     let object_reader = BufReader::new(File::open(format!("assets/scenes/{}", filename)).unwrap_or_else(|_| panic!("object file {} does not exist", filename)));
     let model: Obj<obj::Position> = load_obj(object_reader).unwrap_or_else(|e| panic!("object in file {} has wrong format: {}", filename, e));
 
-    NEMesh {
-        vertices: model.vertices.iter().map(|vertex| {
+    NEMesh::new(
+        model.vertices.iter().map(|vertex| {
             NEVertex {
                 pos: Vec3::from_array(vertex.position),
                 cell: CellRef::new(0),
             }
         }).collect(),
-        faces: model.indices.chunks_exact(3).map(|arr| {
+        model.indices.chunks_exact(3).map(|arr| {
             NETriFace::new(
                 arr[0] as u32,
                 arr[1] as u32,
@@ -61,7 +61,7 @@ fn load_object(filename: &str) -> NEMesh {
                 0
             )
         }).collect()
-    }
+    )
 }
 
 pub fn load_scene(
@@ -108,6 +108,10 @@ pub fn load_scene(
             for mesh in meshes {
                 match mesh {
                     Value::Object(mesh_json) => {
+                        if mesh_json.contains_key("invisible") {
+                            continue;
+                        }
+
                         let Value::String(object) = mesh_json.get("object").expect("mesh should have attached obj file") else { panic!("object value should be string") };
                         let model = load_object(format!("{}/{}", scene_folder, object).as_str());
                         let (translate, scale, rotate) = match mesh_json.get("transform") {
@@ -127,7 +131,7 @@ pub fn load_scene(
                         let exponent = cond_f32(bsdf.get("exponent"), 0.0f32);
 
                         commands.spawn((
-                            Transform::from_translation(translate).with_scale(scale),
+                            Transform::from_translation(translate).with_scale(scale).with_rotation(Quat::from_euler(EulerRot::XYX, rotate.x.to_radians(), rotate.y.to_radians(), rotate.z.to_radians())),
                             model,
                             RaytracingMaterial {
                                 bsdf: string_to_bsdf(&bsdf_type),

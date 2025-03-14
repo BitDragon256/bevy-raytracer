@@ -9,7 +9,8 @@ use bevy::render::{Render, RenderApp, RenderSet};
 use bevy_flycam::{FlyCam, MovementSettings, NoCameraPlayerPlugin};
 use bevy_fps_counter::{FpsCounter, FpsCounterPlugin};
 
-use crate::buffer::{fill_buffers, TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer};
+use crate::buffer::{fill_buffers, TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer, LowLevelAccelerationStructureBuffer, TransformBuffer};
+use crate::extract::GpuTransform;
 use crate::pipeline::RaytracingPipeline;
 use crate::raytracing_render_node::{RaytraceLabel, RaytracingRenderNode};
 use crate::scene::load_scene;
@@ -123,6 +124,7 @@ impl Plugin for RaytracingPlugin {
 
             ExtractComponentPlugin::<NEMesh>::default(),
             ExtractComponentPlugin::<RaytracingMaterial>::default(),
+            ExtractComponentPlugin::<GpuTransform>::default(),
         ));
 
         let Some(render_app) = app.get_sub_app_mut(RenderApp) else { return; };
@@ -143,9 +145,12 @@ impl Plugin for RaytracingPlugin {
 
         // TODO own function to initialize buffers
         render_app.init_resource::<MeshBuffer>();
+        render_app.init_resource::<LowLevelAccelerationStructureBuffer>();
         render_app.init_resource::<VertexBuffer>();
         render_app.init_resource::<TriFaceBuffer>();
         render_app.init_resource::<MaterialBuffer>();
+        render_app.init_resource::<TransformBuffer>();
+
         render_app.add_systems(Render, fill_buffers.in_set(RenderSet::PrepareResources));
 
         println!(">> raytracing plugin build() done");
