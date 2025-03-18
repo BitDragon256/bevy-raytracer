@@ -5,10 +5,10 @@
     "up": [0, 1, 0],
 
     "fov": 39.3077,
-    "sample_count": 128,
+    "sample_count": 16,
     "sampler": "independent",
-    "max_bounces": 10,
-    "min_bounces": 3
+    "max_bounces": 3,
+    "min_bounces": 2
   },
   "meshes": [
     {
@@ -19,7 +19,8 @@
         "radiance": [15, 15, 15]
       },
       "transform": {
-        "translate": [0, -0.5, 0]
+        "translate": [0, -1, 0],
+        "rotate": [0, 0, 0]
       }
     },
     {

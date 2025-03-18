@@ -265,6 +265,9 @@ fn cos_theta(v: vec3f) -> f32 {
 fn square_length(v: vec2f) -> f32 {
     return v.x * v.x + v.y * v.y;
 }
+fn mean(v: vec3f) -> f32 {
+    return (v.x + v.y + v.z) / 3.0;
+}
 
 struct Frame {
     u: vec3f, // tangent 1
@@ -461,12 +464,14 @@ struct MetropolisState {
     last_sample: vec2f,
     last_eval_sample: BSDFContext,
     next_sample: vec2f,
-    // rng_state: ptr<function, RngState>,
     first: bool,
 }
 
-fn metropolis_mutate(v: vec2f, rng_state: ptr<function, RngState>) -> vec2f {
-    return next_random_2d(rng_state);
+fn metropolis_mutate(last: vec2f, rng_state: ptr<function, RngState>) -> vec2f {
+    if next_random(rng_state) < 0.1 {
+        return next_random_2d(rng_state);
+    }
+    return abs(fract(last + (next_random_2d(rng_state) - vec2f(0.5)) / 64.0 ));
 }
 fn next_proposed_metropolis(state: ptr<function, MetropolisState>, rng_state: ptr<function, RngState>) -> vec2f {
     let next = metropolis_mutate((*state).last_sample, rng_state);
@@ -474,9 +479,7 @@ fn next_proposed_metropolis(state: ptr<function, MetropolisState>, rng_state: pt
     return next;
 }
 fn next_metropolis(eval_proposed: BSDFContext, state: ptr<function, MetropolisState>, rng_state: ptr<function, RngState>) -> BSDFContext {
-    let acceptance_ratio = length(
-        eval_proposed.color / (*state).last_eval_sample.color
-    );
+    let acceptance_ratio = min(1.0, mean(eval_proposed.color) / mean((*state).last_eval_sample.color));
     if ((*state).first || next_random(rng_state) < acceptance_ratio) {
         (*state).first = false;
         (*state).last_sample = (*state).next_sample;
@@ -517,6 +520,8 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>, metropolis_st
     var radiance = vec3f(0.0);
     var ray = in_ray;
 
+    var weight: f32;
+
     for (var bounce = 0u; bounce < camera.max_bounces; bounce++) {
         let hit_info = trace_ray(ray);
         if !hit_info.hit {
@@ -528,13 +533,14 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>, metropolis_st
 
         let material = material_buffer[hit_info.material_index];
 
-        let bsdf_context = next_metropolis(
-            sample_bsdf(incident_dir, next_proposed_metropolis(metropolis_state, rng_state), material),
-            metropolis_state,
-            rng_state,
-        );
+        // TODO fix metropolis start bias
+        // let bsdf_context = next_metropolis(
+        //     sample_bsdf(incident_dir, next_proposed_metropolis(metropolis_state, rng_state), material),
+        //     metropolis_state,
+        //     rng_state,
+        // );
 
-        // let bsdf_context = sample_bsdf(incident_dir, next_random_2d(rng_state), material);
+        let bsdf_context = sample_bsdf(incident_dir, next_random_2d(rng_state), material);
 
         if is_emitter(material) {
             radiance += eval_emitter(incident_dir, material) * throughput;

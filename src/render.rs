@@ -1,13 +1,20 @@
 use bevy::app::{App, Plugin};
 use bevy::core_pipeline::core_3d::graph::{Core3d, Node3d};
-use bevy::prelude::*;
-use bevy::render::extract_component::{ExtractComponent, ExtractComponentPlugin, UniformComponentPlugin};
-use bevy::render::render_graph::{RenderGraphApp, ViewNodeRunner};
-use bevy::render::render_resource::ShaderType;
-use bevy::render::{Render, RenderApp, RenderSet};
+use bevy::{
+    prelude::*,
+    render::{
+        extract_component::{ExtractComponent, ExtractComponentPlugin, UniformComponentPlugin},
+        render_graph::{RenderGraphApp, ViewNodeRunner},
+        render_resource::ShaderType,
+        {Render, RenderApp, RenderSet},
+        view::screenshot::{save_to_disk, Capturing, Screenshot},
+    },
+    window::SystemCursorIcon,
+    winit::cursor::CursorIcon,
+};
 
-use bevy_flycam::{FlyCam, MovementSettings, NoCameraPlayerPlugin};
-use bevy_fps_counter::{FpsCounter, FpsCounterPlugin};
+use bevy_flycam::{MovementSettings, NoCameraPlayerPlugin};
+use bevy_fps_counter::{FpsCounterPlugin};
 
 use crate::buffer::{fill_buffers, TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer, LowLevelAccelerationStructureBuffer, TransformBuffer, BufferCache};
 use crate::extract::GpuTransform;
@@ -20,65 +27,6 @@ pub fn setup(
     mut commands: Commands,
 ) {
     load_scene(commands, "cbox/cbox.json");
-
-    // commands.spawn((
-    //     Camera3d::default(),
-    //     Transform::from_translation(Vec3::new(0.0, 0.0, 3.0)).looking_at(Vec3::default(), Vec3::Y),
-    //     Camera {
-    //         clear_color: Color::BLACK.into(),
-    //         ..default()
-    //     },
-    //     RaytracingCamera {
-    //         bounces: 2,
-    //         samples: 50,
-    //     },
-    //     FlyCam
-    // ));
-
-    // commands.spawn((
-    //     Transform::from_translation(Vec3::ZERO),
-    //     NEMesh {
-    //         vertices: vec![
-    //             NEVertex::new(0.0, 0.0, -0.5, CellRef::new(0)),
-    //             NEVertex::new(0.0, 1.0, 0.0, CellRef::new(0)),
-    //             NEVertex::new(1.0, 0.0, 0.0, CellRef::new(0)),
-    //         ],
-    //         faces: vec![
-    //             NETriFace::new(0, 2, 1, 0),
-    //             NETriFace::new(0, 1, 2, 0),
-    //         ],
-    //     },
-    //     RaytracingMaterial {
-    //         bsdf: 1,
-    //         albedo: Vec3::new(0.4, 0.6, 0.3),
-    //         specular: Vec3::new(0.1, 0.1, 0.3),
-    //         exponent: 0.5,
-    //         radiance: Vec3::new(0.0, 0.0, 0.0),
-    //     },
-    // ));
-
-    // commands.spawn((
-    //     Transform::from_translation(Vec3::ZERO),
-    //     NEMesh {
-    //         vertices: vec![
-    //             NEVertex::new(0.0, 0.0, -0.5, CellRef::new(0)),
-    //             NEVertex::new(0.0, -1.0, 0.0, CellRef::new(0)),
-    //             NEVertex::new(1.0, 0.0, 0.0, CellRef::new(0)),
-    //         ],
-    //         faces: vec![
-    //             NETriFace::new(0, 1, 2, 1),
-    //             NETriFace::new(0, 2, 1, 1),
-    //         ],
-    //     },
-    //     RaytracingMaterial {
-    //         bsdf: 1,
-    //         albedo: Vec3::new(0.8, 0.2, 0.5),
-    //         specular: Vec3::new(0.1, 0.1, 0.3),
-    //         exponent: 0.5,
-    //         radiance: Vec3::new(1.0, 1.0, 1.0),
-    //     },
-    // ));
-
     println!(">> example scene set up");
 }
 
@@ -122,7 +70,8 @@ impl Plugin for RaytracingPlugin {
             .insert_resource(MovementSettings {
                 sensitivity: 0.00010,
                 speed: 180.0,
-            });
+            })
+            .add_systems(Update, (take_screenshot, screenshot_saving));
 
         app.add_plugins((
             ExtractComponentPlugin::<GpuRaytracingCamera>::default(),
@@ -169,5 +118,41 @@ impl Plugin for RaytracingPlugin {
         render_app.init_resource::<RaytracingPipeline>();
 
         println!(">> raytracing plugin finish() done")
+    }
+}
+
+fn take_screenshot(
+    mut commands: Commands,
+    input: Res<ButtonInput<KeyCode>>,
+    mut counter: Local<u32>,
+) {
+    if input.just_pressed(KeyCode::KeyR) {
+        let path = format!("./screenshots/screenshot-{}.png", *counter);
+        println!(">> screenshot saved under {}", path);
+        *counter += 1;
+        commands
+            .spawn(Screenshot::primary_window())
+            .observe(save_to_disk(path));
+    }
+}
+
+fn screenshot_saving(
+    mut commands: Commands,
+    screenshot_saving: Query<Entity, With<Capturing>>,
+    windows: Query<Entity, With<Window>>,
+) {
+    let Ok(window) = windows.get_single() else {
+        return;
+    };
+    match screenshot_saving.iter().count() {
+        0 => {
+            commands.entity(window).remove::<CursorIcon>();
+        }
+        x if x > 0 => {
+            commands
+                .entity(window)
+                .insert(CursorIcon::from(SystemCursorIcon::Progress));
+        }
+        _ => {}
     }
 }
