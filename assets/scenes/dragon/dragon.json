@@ -1,0 +1,146 @@
+{
+  "camera": {
+    "origin": [-16, 11, 17],
+    "target": [-1, 8, 0],
+    "up": [0, 1, 0],
+
+    "fov": 40,
+    "sample_count": 16,
+    "sampler": "independent",
+    "max_bounces": 3,
+    "min_bounces": 2
+  },
+  "meshes": [
+    {
+        "object": "meshes/Mesh008_simplified.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.507, 0.328, 0.153]
+        }
+    },
+    {
+        "object": "meshes/Mesh013_simplified.obj",
+        "bsdf": {
+            "type": "mirror",
+            "albedo": [0.9, 0.9, 0.8]
+        }
+    },
+    {
+        "object": "meshes/emitter.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.6, 0.6, 0.6],
+            "radiance": [8, 7, 6]
+        }
+    },
+    {
+        "object": "meshes/emitter2.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.6, 0.6, 0.6],
+            "radiance": [3, 1.5, 1]
+        }
+    }
+    ],
+    "_meshes": [
+    {
+        "object": "meshes/Mesh011.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.9, 0.9, 0.6]
+        }
+    },
+    {
+        "object": "meshes/box.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.1, 0.1, 0.1]
+        },
+        "texture": "textures/stpeters_cross_clamped.exr"
+    },
+    {
+        "object": "meshes/Mesh015.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.9, 0.9, 0.9]
+        }
+    },
+    {
+        "object": "meshes/Mesh006.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.3, 0.3, 0.3]
+        }
+    },
+    {
+        "object": "meshes/Mesh012_simplified.obj",
+        "bsdf": {
+            "type": "mirror",
+            "albedo": [0.01, 0.01, 0.01]
+        }
+    },
+    {
+        "object": "meshes/Mesh005.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.3, 0.3, 0.3]
+        }
+    },
+    {
+        "object": "meshes/Mesh007_simplified.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.3, 0.3, 0.3]
+        }
+    },
+    {
+        "object": "meshes/Mesh000.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.75, 0.65, 0.125]
+        }
+    },
+    {
+        "object": "meshes/Mesh001.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.75, 0.65, 0.125]
+        }
+    },
+    {
+        "object": "meshes/Mesh002.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.75, 0.65, 0.125]
+        }
+    },
+    {
+        "object": "meshes/Mesh003.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.75, 0.65, 0.125]
+        }
+    },
+    {
+        "object": "meshes/Mesh004.obj",
+        "bsdf": {
+            "type": "mirror",
+            "albedo": [0.75, 0.65, 0.125]
+        }
+    },
+    {
+        "object": "meshes/Mesh009.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.75, 0.65, 0.125]
+        }
+    },
+    {
+        "object": "meshes/Mesh010_simplified.triangulated.obj",
+        "bsdf": {
+            "type": "diffuse",
+            "albedo": [0.8, 0.3, 0.3]
+        }
+    }
+    ]
+}
