@@ -1,7 +1,7 @@
 use bevy::prelude::{Deref, Entity, EntityRef, GlobalTransform, Query, Res, ResMut, Resource, Transform, World};
 use bevy::render::render_resource::StorageBuffer;
 use crate::extract::{GpuBvhNode, GpuNEMesh, GpuTransform};
-use crate::types::{NEVertex, NEMesh, RaytracingMaterial, NETriFace};
+use crate::types::{NEVertex, NEMesh, RaytracingMaterial, NETriFace, RaytracingLight};
 
 #[derive(Resource, Deref, Default)]
 pub struct MeshBuffer(std::sync::Mutex<StorageBuffer<Vec<GpuNEMesh>>>);
@@ -26,6 +26,9 @@ pub struct MaterialBuffer(std::sync::Mutex<StorageBuffer<Vec<RaytracingMaterial>
 #[derive(Resource, Deref, Default)]
 pub struct TransformBuffer(std::sync::Mutex<StorageBuffer<Vec<GpuTransform>>>);
 
+#[derive(Resource, Deref, Default)]
+pub struct LightBuffer(std::sync::Mutex<StorageBuffer<Vec<RaytracingLight>>>);
+
 #[derive(Resource)]
 pub struct BufferCache {
     pub pushed: bool,
@@ -49,6 +52,7 @@ pub fn fill_buffers(
     tri_face_buffer: Res<TriFaceBuffer>,
     material_buffer: Res<MaterialBuffer>,
     transform_buffer: Res<TransformBuffer>,
+    light_buffer: Res<LightBuffer>,
     mut buffer_cache: ResMut<BufferCache>,
     mut meshes: Query<(&mut NEMesh, &RaytracingMaterial, &GpuTransform)>,
 ) {
@@ -66,9 +70,15 @@ pub fn fill_buffers(
     let mut tri_faces = Vec::new();
     let mut materials = Vec::new();
     let mut transforms = Vec::new();
+    let mut lights = Vec::new();
 
     for (mut mesh, material, transform) in &mut meshes {
         let mut flattened_bvh = mesh.bvh.flatten_custom(&GpuBvhNode::from_bvh);
+
+        if material.radiance.length() > 0f32 {
+            lights.push(RaytracingLight::new(all_meshes.len() as u32));
+        }
+
         all_meshes.push(GpuNEMesh {
             vertex_offset: vertices.len() as u32,
             face_offset: tri_faces.len() as u32,
@@ -91,6 +101,7 @@ pub fn fill_buffers(
     let Ok(mut tri_face_buffer) = tri_face_buffer.lock() else { return; };
     let Ok(mut material_buffer) = material_buffer.lock() else { return; };
     let Ok(mut transform_buffer) = transform_buffer.lock() else { return; };
+    let Ok(mut light_buffer) = light_buffer.lock() else { return; };
 
     model_buffer.set(all_meshes);
     llas_buffer.set(gpu_bvh);
@@ -98,4 +109,5 @@ pub fn fill_buffers(
     tri_face_buffer.set(tri_faces);
     material_buffer.set(materials);
     transform_buffer.set(transforms);
+    light_buffer.set(lights);
 }

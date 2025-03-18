@@ -124,6 +124,7 @@ struct HitInfo {
     distance: f32,
     face_index: u32,
     material_index: u32,
+    mesh_index: u32,
 }
 
 struct Material {
@@ -144,6 +145,10 @@ struct BSDFContext {
 
 struct Transform {
     matrix: mat4x4f,
+}
+
+struct Light {
+    mesh_index: u32,
 }
 
 // #import "shaders/const.wgsl"::{INV_PI, INV_TWOPI}
@@ -187,6 +192,7 @@ fn square_to_cosine_hemisphere(v: vec2f) -> vec3f {
 @group(1) @binding(3) var<storage, read> tri_face_buffer: array<NETriFace>;
 @group(1) @binding(4) var<storage, read> material_buffer: array<Material>;
 @group(1) @binding(5) var<storage, read> transform_buffer: array<Transform>;
+@group(1) @binding(6) var<storage, read> light_buffer: array<Light>;
 
 fn apply_transform(transform: Transform, v: vec3f) -> vec3f {
     return (transform.matrix * vec4f(v, 1.0)).xyz;
@@ -390,6 +396,22 @@ fn diffuse_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) ->
     return context;
 }
 
+fn eval_bsdf_pdf(context: BSDFContext, material: Material) -> f32 {
+    if material.bsdf == 0 {
+        return diffuse_pdf(context, material);
+    } else if material.bsdf == 1 {
+        return phong_pdf(context, material);
+    }
+    return 0.0;
+}
+fn eval_bsdf(context: BSDFContext, material: Material) -> vec3f {
+    if material.bsdf == 0 {
+        return diffuse_eval(context, material);
+    } else if material.bsdf == 1 {
+        return phong_eval(context, material);
+    }
+    return vec3f(0.0);
+}
 fn sample_bsdf(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> BSDFContext {
     if material.bsdf == 0 {
         return diffuse_sample(incident_dir, rng_sample, material);
@@ -411,6 +433,7 @@ fn trace_ray(ray: Ray) -> HitInfo {
         let mesh_hit_info = intersect_mesh(mod_ray, mesh);
         if mesh_hit_info.hit && mesh_hit_info.distance < nearest_hit_info.distance {
             nearest_hit_info = mesh_hit_info;
+            nearest_hit_info.mesh_index = mesh_index;
         }
     }
     return nearest_hit_info;
@@ -508,11 +531,27 @@ fn uv_to_rng_state(uv: vec2f) -> RngState {
     );
 }
 
+struct EmitterContext {
+    color: vec3f,
+    incident_dir: vec3f,
+    outgoing_dir: vec3f,
+    mesh_index: u32,
+}
+
 fn is_emitter(material: Material) -> bool {
     return dot(material.radiance, material.radiance) != 0.0;
 }
 fn eval_emitter(incident_dir: vec3f, material: Material) -> vec3f {
     return material.radiance * cos_theta(incident_dir);
+}
+fn direct_emitter_pdf(incident_dir: vec3f, mesh_index: u32) -> vec3f {
+    return 0.5;
+}
+fn sample_direct_emitter(rng_sample: vec2f) -> EmitterContext {
+
+}
+fn mi_weight(a: f32, b: f32) -> f32 {
+    return (a + b) / 2.0;
 }
 
 fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>, metropolis_state: ptr<function, MetropolisState>) -> vec3f {
@@ -562,13 +601,91 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>, metropolis_st
     return radiance;
 }
 
+fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
+    var throughput = vec3f(1.0);
+    var radiance = vec3f(0.0);
+    var ray = in_ray;
+
+    var weight: f32;
+
+    for (var bounce = 0u; bounce < camera.max_bounces; bounce++) {
+        let hit_info = trace_ray(ray);
+        if !hit_info.hit {
+            break;
+        }
+
+        let local_frame = create_frame(hit_info.normal);
+        let incident_dir = to_local(-ray.direction, local_frame);
+
+        let material = material_buffer[hit_info.material_index];
+
+        if is_emitter(material) {
+            let bsdf_context = BSDFContext(
+                incident_dir,
+                incident_dir,
+                1.0,
+                vec2f(1.0),
+                vec3f(0.0),
+            );
+            let bsdf_pdf = eval_bsdf_pdf(bsdf_context, material);
+            let emitter_pdf = direct_emitter_pdf(incident_dir, hit_info.mesh_index);
+            let weight = mi_weight(bsdf_pdf, emitter_pdf);
+
+            radiance += throughput * eval_emitter(incident_dir) * weight;
+        }
+
+        // direct illumination
+
+        let emitter_context = sample_direct_emitter(next_random_2d(rng_state));
+        let bsdf_context = BSDFContext(
+            incident_dir,
+            emitter_context.outgoing_dir,
+            1.0,
+            vec2f(1.0),
+            vec3f(0.0),
+        );
+
+        let emitter_pdf = direct_emitter_pdf(emitter_context.incident_dir, emitter_context.mesh_index);
+        let bsdf_pdf = eval_bsdf_pdf(bsdf_context, material);
+        let weight = mi_weight(emitter_pdf, bsdf_pdf);
+
+        let contribution = 
+            throughput
+            * emitter_context.color
+            * eval_bsdf(bsdf_context)
+            * abs(cos_theta(incident_dir))
+            * weight;
+
+        let shadow_ray_hit_info = trace_ray(Ray(hit_info.intersection, -to_world(emitter_context.outgoing_dir, local_frame)));
+        if shadow_ray_hit_info.hit {
+            radiance += contribution;
+        }
+
+        // continue with bsdf
+        let bsdf_context = sample_bsdf(incident_dir, next_random_2d(rng_state), material);
+        throughput *= bsdf_context.color;
+
+        if bounce >= camera.min_bounces {
+            let probability_to_die = max(0.01, length(bsdf_context.color));
+            if next_random(rng_state) > probability_to_die {
+                break;
+            }
+            throughput /= probability_to_die;
+        }
+
+        ray = Ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
+    }
+
+    return radiance;
+}
+
 @fragment
 fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4f {
     var rng_state = uv_to_rng_state(in.uv);
-    var metropolis_state = metropolis_init();
+    // var metropolis_state = metropolis_init();
     var color = vec3f(0.0);
     for (var sample_index = 0u; sample_index < camera.samples; sample_index++) {
-        color += eval_bsdf_path(ray_from_uv(in.uv), &rng_state, &metropolis_state);
+        color += eval_mis_path(ray_from_uv(in.uv), &rng_state);
     }
     return vec4f(color / f32(camera.samples), 1.0);
 }

@@ -6,7 +6,7 @@ use bevy::render::render_graph::{NodeRunError, RenderGraphContext, RenderLabel, 
 use bevy::render::render_resource::{AsBindGroupShaderType, BindGroupEntries, Operations, PipelineCache, RenderPassColorAttachment, RenderPassDescriptor};
 use bevy::render::renderer::{RenderContext, RenderQueue};
 use bevy::render::view::ViewTarget;
-use crate::buffer::{TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer, LowLevelAccelerationStructureBuffer, TransformBuffer};
+use crate::buffer::{TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer, LowLevelAccelerationStructureBuffer, TransformBuffer, LightBuffer};
 use crate::pipeline::RaytracingPipeline;
 use crate::render::GpuRaytracingCamera;
 
@@ -80,6 +80,11 @@ impl ViewNode for RaytracingRenderNode {
             .lock()
             .expect("transform buffer mutex is unexpectedly locked");
 
+        let lights = world.resource::<LightBuffer>();
+        let mut light_buffer = lights
+            .lock()
+            .expect("light buffer mutex is unexpectedly locked");
+
         let render_device = render_context.render_device();
         let render_queue = world.resource::<RenderQueue>();
 
@@ -89,6 +94,7 @@ impl ViewNode for RaytracingRenderNode {
         tri_face_buffer.write_buffer(render_device, render_queue);
         material_buffer.write_buffer(render_device, render_queue);
         transform_buffer.write_buffer(render_device, render_queue);
+        light_buffer.write_buffer(render_device, render_queue);
 
         let Some(mesh_buffer_binding) = mesh_buffer.binding() else { return Ok(()) };
         let Some(llas_buffer_binding) = llas_buffer.binding() else { return Ok(()) };
@@ -96,6 +102,7 @@ impl ViewNode for RaytracingRenderNode {
         let Some(tri_face_buffer) = tri_face_buffer.binding() else { return Ok(()) };
         let Some(material_buffer_binding) = material_buffer.binding() else { return Ok(()) };
         let Some(transform_buffer_binding) = transform_buffer.binding() else { return Ok(()) };
+        let Some(light_buffer_binding) = light_buffer.binding() else { return Ok(()) };
 
         let bind_group = render_device.create_bind_group(
             "raytrace_bind_group",
@@ -118,6 +125,7 @@ impl ViewNode for RaytracingRenderNode {
                 tri_face_buffer,
                 material_buffer_binding,
                 transform_buffer_binding,
+                light_buffer_binding,
             )),
         );
 

@@ -90,6 +90,19 @@ pub struct RaytracingMaterial {
     pub exponent: f32,
 }
 
+#[derive(ShaderType)]
+pub struct RaytracingLight {
+    pub mesh_index: u32,
+}
+
+impl RaytracingLight {
+    pub fn new(mesh_index: u32) -> Self {
+        Self {
+            mesh_index,
+        }
+    }
+}
+
 pub fn string_to_bsdf(name: &str) -> u32 {
     match name {
         "diffuse" => 0,

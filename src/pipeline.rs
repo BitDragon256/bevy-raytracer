@@ -76,6 +76,12 @@ impl FromWorld for RaytracingPipeline {
                         has_dynamic_offset: false,
                         min_binding_size: None,
                     },
+                    // light buffer
+                    BindingType::Buffer {
+                        ty: BufferBindingType::Storage { read_only: true },
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
                 )
             )
         );

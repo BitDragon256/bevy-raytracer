@@ -16,7 +16,7 @@ use bevy::{
 use bevy_flycam::{MovementSettings, NoCameraPlayerPlugin};
 use bevy_fps_counter::{FpsCounterPlugin};
 
-use crate::buffer::{fill_buffers, TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer, LowLevelAccelerationStructureBuffer, TransformBuffer, BufferCache};
+use crate::buffer::{fill_buffers, TriFaceBuffer, MaterialBuffer, MeshBuffer, VertexBuffer, LowLevelAccelerationStructureBuffer, TransformBuffer, BufferCache, LightBuffer};
 use crate::extract::GpuTransform;
 use crate::pipeline::RaytracingPipeline;
 use crate::raytracing_render_node::{RaytraceLabel, RaytracingRenderNode};
@@ -26,8 +26,8 @@ use crate::types::{CellRef, NEMesh, NETriFace, NEVertex, RaytracingMaterial};
 pub fn setup(
     mut commands: Commands,
 ) {
-    // load_scene(commands, "cbox/cbox.json");
-    load_scene(commands, "dragon/dragon.json");
+    load_scene(commands, "cbox/cbox.json");
+    // load_scene(commands, "dragon/dragon.json");
     println!(">> example scene set up");
 }
 
@@ -106,6 +106,7 @@ impl Plugin for RaytracingPlugin {
         render_app.init_resource::<TriFaceBuffer>();
         render_app.init_resource::<MaterialBuffer>();
         render_app.init_resource::<TransformBuffer>();
+        render_app.init_resource::<LightBuffer>();
 
         render_app.init_resource::<BufferCache>();
 
