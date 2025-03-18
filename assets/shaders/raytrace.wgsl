@@ -456,6 +456,46 @@ fn next_random(state: ptr<function, RngState>) -> f32 {
 fn next_random_2d(state: ptr<function, RngState>) -> vec2f {
     return vec2f(next_random(state), next_random(state));
 }
+
+struct MetropolisState {
+    last_sample: vec2f,
+    last_eval_sample: BSDFContext,
+    next_sample: vec2f,
+    // rng_state: ptr<function, RngState>,
+    first: bool,
+}
+
+fn metropolis_mutate(v: vec2f, rng_state: ptr<function, RngState>) -> vec2f {
+    return next_random_2d(rng_state);
+}
+fn next_proposed_metropolis(state: ptr<function, MetropolisState>, rng_state: ptr<function, RngState>) -> vec2f {
+    let next = metropolis_mutate((*state).last_sample, rng_state);
+    (*state).next_sample = next;
+    return next;
+}
+fn next_metropolis(eval_proposed: BSDFContext, state: ptr<function, MetropolisState>, rng_state: ptr<function, RngState>) -> BSDFContext {
+    let acceptance_ratio = length(
+        eval_proposed.color / (*state).last_eval_sample.color
+    );
+    if ((*state).first || next_random(rng_state) < acceptance_ratio) {
+        (*state).first = false;
+        (*state).last_sample = (*state).next_sample;
+        (*state).last_eval_sample = eval_proposed;
+
+        return eval_proposed;
+    }
+    return (*state).last_eval_sample;
+}
+
+fn metropolis_init() -> MetropolisState {
+    return MetropolisState(
+        vec2f(0.0),
+        BSDFContext(),
+        vec2f(0.0),
+        true,
+    );
+}
+
 fn uv_to_rng_state(uv: vec2f) -> RngState {
     return RngState(
         bitcast<u32>(fract(sin(dot(uv.xy, vec2f(12.9898, 78.2338))) * 43758.5453123)),
@@ -472,7 +512,7 @@ fn eval_emitter(incident_dir: vec3f, material: Material) -> vec3f {
     return material.radiance * cos_theta(incident_dir);
 }
 
-fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
+fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>, metropolis_state: ptr<function, MetropolisState>) -> vec3f {
     var throughput = vec3f(1.0);
     var radiance = vec3f(0.0);
     var ray = in_ray;
@@ -488,7 +528,13 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
 
         let material = material_buffer[hit_info.material_index];
 
-        let bsdf_context = sample_bsdf(incident_dir, next_random_2d(rng_state), material);
+        let bsdf_context = next_metropolis(
+            sample_bsdf(incident_dir, next_proposed_metropolis(metropolis_state, rng_state), material),
+            metropolis_state,
+            rng_state,
+        );
+
+        // let bsdf_context = sample_bsdf(incident_dir, next_random_2d(rng_state), material);
 
         if is_emitter(material) {
             radiance += eval_emitter(incident_dir, material) * throughput;
@@ -513,9 +559,10 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
 @fragment
 fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4f {
     var rng_state = uv_to_rng_state(in.uv);
+    var metropolis_state = metropolis_init();
     var color = vec3f(0.0);
     for (var sample_index = 0u; sample_index < camera.samples; sample_index++) {
-        color += eval_bsdf_path(ray_from_uv(in.uv), &rng_state);
+        color += eval_bsdf_path(ray_from_uv(in.uv), &rng_state, &metropolis_state);
     }
     return vec4f(color / f32(camera.samples), 1.0);
 }

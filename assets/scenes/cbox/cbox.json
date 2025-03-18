@@ -7,7 +7,7 @@
     "fov": 39.3077,
     "sample_count": 128,
     "sampler": "independent",
-    "max_bounces": 100,
+    "max_bounces": 10,
     "min_bounces": 3
   },
   "meshes": [
