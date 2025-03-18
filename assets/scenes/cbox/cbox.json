@@ -5,9 +5,9 @@
     "up": [0, 1, 0],
 
     "fov": 39.3077,
-    "sample_count": 32,
+    "sample_count": 128,
     "sampler": "independent",
-    "max_bounces": 10,
+    "max_bounces": 100,
     "min_bounces": 3
   },
   "meshes": [
@@ -58,17 +58,31 @@
       }
     },
     {
-      "invisible": 42,
+      "_invisible": 42,
       "object": "meshes/bunny.obj",
       "bsdf": {
         "type": "diffuse",
-        "albedo": [0.61, 0.62, 0.06],
+        "albedo": [0.8, 0.8, 0.8],
         "radiance": [0.4, 0.3, 0.1]
       },
       "transform": {
         "translate": [390, -35, 100],
         "scale": [800, 800, 800],
         "rotate": [0, 180, 0]
+      }
+    },
+    {
+      "object": "meshes/cbox_smallbox.obj",
+      "bsdf": {
+        "type": "diffuse",
+        "albedo": [0.75, 0.75, 0.75]
+      }
+    },
+    {
+      "object": "meshes/cbox_largebox.obj",
+      "bsdf": {
+        "type": "diffuse",
+        "albedo": [0.75, 0.75, 0.75]
       }
     }
   ]

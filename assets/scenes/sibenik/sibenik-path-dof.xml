@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Handcrafted based on OBJ reference from McGuire -->
+<scene>
+	<integrator type="simplepath">
+		<integer name="maxBounces" value="10"/>
+		<integer name="rrMinBounces" value="3"/>
+	</integrator>
+
+	<sampler type="independent">
+		<integer name="sampleCount" value="128"/>
+	</sampler>
+
+	<camera type="perspective_dof">
+		<transform name="toWorld">
+			<lookat origin="-18, -12, 0" target="5, -13, 0" up="0, 1, 0"/>
+		</transform>
+		<float name="fov" value="32"/>
+		<integer name="width" value="512"/>
+		<integer name="height" value="288"/>
+		<float name="apertureRadius" value="0.5"/>
+		<float name="focusDistance" value="22.5"/>
+	</camera>
+
+	<mesh type="obj">
+		<string name="filename" value="meshes/kamen_zid_parapet.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.734118, 0.730588, 0.674118"/>
+			<texture type="bitmaptexture">
+				<string name="filename" value="textures/KAMEN-stup.exr"/>
+			</texture>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/kamen_zid_prozor.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.734118, 0.730588, 0.674118"/>
+			<texture type="bitmaptexture">
+				<string name="filename" value="textures/kamen.exr"/>
+			</texture>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/kamen_zid.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.734118, 0.730588, 0.674118"/>
+			<texture type="bitmaptexture">
+				<string name="filename" value="textures/kamen.exr"/>
+			</texture>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/pod_rub.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.734118, 0.730588, 0.674118"/>
+			<texture type="bitmaptexture">
+				<string name="filename" value="textures/kamen.exr"/>
+			</texture>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/pod_tepih.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="1, 0.12, 0.1"/>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/pod.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.734118, 0.709412, 0.674118"/>
+			<texture type="bitmaptexture">
+				<string name="filename" value="textures/marmor6x6.exr"/>
+			</texture>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/rozeta.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.734118, 0.730588, 0.674118"/>
+			<texture type="bitmaptexture">
+				<string name="filename" value="textures/KAMEN-stup.exr"/>
+			</texture>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/sprljci.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.784314, 0.784314, 0.784314"/>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/staklo_crveno.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.441176, 0.103922, 0.049020"/>
+			<!--specular-->
+			<!--0.882353 0.207843 0.098039-->
+		</bsdf>
+	</mesh>
+	<!--<mesh type="obj">
+		<string name="filename" value="meshes/staklo_plavo.obj"/>
+		<bsdf type="dielectric">
+			<color name="specularTransmittance" value="0.082353, 0.145098, 0.784314"/>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/staklo_zeleno.obj"/>
+		<bsdf type="dielectric">
+			<color name="specularTransmittance" value="0.066667, 0.631373, 0.074510"/>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/staklo_zuto.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="1.000000, 0.890196, 0.007843"/>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/staklo.obj"/>
+		<bsdf type="dielectric"/>
+	</mesh>-->
+	<mesh type="obj">
+		<string name="filename" value="meshes/stupovi.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.734118, 0.730588, 0.674118"/>
+			<texture type="bitmaptexture">
+				<string name="filename" value="textures/KAMEN-stup.exr"/>
+			</texture>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/zid_vani.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.734118, 0.730588, 0.674118"/>
+			<texture type="bitmaptexture">
+				<string name="filename" value="textures/kamen.exr"/>
+			</texture>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/emitter.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0, 0, 0"/>
+		</bsdf>
+		<emitter type="area">
+			<color name="radiance" value="10, 10, 10"/>
+		</emitter>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/bunny.obj"/>
+		<transform name="toWorld">
+			<rotate axis="0, 1, 0" angle="-80"/>
+			<translate value="5.35, -14.2, 1.2"/>
+		</transform>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.78, 0.78, 0.78"/>
+		</bsdf>
+	</mesh>
+</scene>

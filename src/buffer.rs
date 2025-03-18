@@ -36,7 +36,7 @@ impl Default for BufferCache {
     fn default() -> Self {
         Self {
             pushed: false,
-            iters: 10,
+            iters: 100,
         }
     }
 }
