@@ -148,6 +148,7 @@ struct Transform {
 }
 
 struct Light {
+    face_index: u32,
     mesh_index: u32,
 }
 
@@ -177,6 +178,17 @@ fn square_to_uniform_disk(v: vec2f) -> vec2f {
 fn square_to_cosine_hemisphere(v: vec2f) -> vec3f {
     let disk = square_to_uniform_disk(v);
     return vec3f(disk.x, disk.y, sqrt(1.0 - square_length(disk)));
+}
+fn square_to_uniform_triangle(v: vec2f) -> vec2f {
+    if v.y >= v.x {
+        return -v + vec2f(1.0);
+    }
+    return v;
+}
+fn uniform_triangle_to_triangle(v: vec2f, a: vec3f, b: vec3f, c: vec3f) -> vec3f {
+    let sqrtU = sqrt(v.x);
+    let barycentric = vec3f(1.0 - sqrtU, sqrtU * (1.0 - v.y), sqrtU * v.y);
+    return barycentric.x * a + barycentric.y * b + barycentric.z * c;
 }
 
 // RAYTRACE.wgsl
@@ -214,6 +226,8 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
 
         if bvh_node.entry_index == U32_MAX { // leaf node
             let face = tri_face_buffer[bvh_node.shape_index + mesh.face_offset];
+
+            // NOTE vertex access
             let a = apply_transform(transform, vertex_buffer[face.a + mesh.vertex_offset].position);
             let b = apply_transform(transform, vertex_buffer[face.b + mesh.vertex_offset].position);
             let c = apply_transform(transform, vertex_buffer[face.c + mesh.vertex_offset].position);
@@ -533,22 +547,62 @@ fn uv_to_rng_state(uv: vec2f) -> RngState {
 
 struct EmitterContext {
     color: vec3f,
-    incident_dir: vec3f,
-    outgoing_dir: vec3f,
-    mesh_index: u32,
+    emitter_pdf: f32,
+    emittance_dir: vec3f,
+    world_incident_dir: vec3f, // the direction from the origin to the emittance origin
+    emittance_origin: vec3f,
+    light: Light,
 }
 
 fn is_emitter(material: Material) -> bool {
     return dot(material.radiance, material.radiance) != 0.0;
 }
-fn eval_emitter(incident_dir: vec3f, material: Material) -> vec3f {
-    return material.radiance * cos_theta(incident_dir);
+fn eval_emitter_direct(emittance_dir: vec3f, material: Material) -> vec3f {
+    return material.radiance * cos_theta(emittance_dir);
 }
-fn direct_emitter_pdf(incident_dir: vec3f, mesh_index: u32) -> vec3f {
+fn emitter_pdf_direct(square_distance: f32, emittance_dir: vec3f, mesh: NEMesh) -> vec3f {
+    // return square_distance / (mesh.surface_area * cos_theta(emittance_dir));
     return 0.5;
 }
-fn sample_direct_emitter(rng_sample: vec2f) -> EmitterContext {
+fn sample_emitter_direct(origin: vec3f, light: Light, rng_sample: vec2f) -> EmitterContext {
+    let mesh = mesh_buffer[light.mesh_index];
+    let face = tri_face_buffer[mesh.face_offset + light.face_index];
+    let material = material_buffer[face.material_index + mesh.material_offset];
 
+    // NOTE vertex access
+    let a = vertex_buffer[face.a + mesh.vertex_offset].position;
+    let b = vertex_buffer[face.b + mesh.vertex_offset].position;
+    let c = vertex_buffer[face.c + mesh.vertex_offset].position;
+
+    let n = normalize(cross(b - a, c - a));
+    let p = uniform_triangle_to_triangle(
+        square_to_uniform_triangle(rng_sample),
+        a, b, c
+    );
+
+    let local_frame = create_frame(n);
+
+    let emitter_context = EmitterContext();
+    emitter_context.light = light;
+    emitter_context.emittance_origin = p;
+
+    // TODO find better way of calculating length and square length
+    let delta = p - origin;
+    let delta_length = length(delta);
+    emitter_context.world_incident_dir = delta / delta_length;
+    emitter_context.emittance_dir = to_local(emitter_context.world_incident_dir, local_frame);
+    emitter_context.emitter_pdf = emitter_pdf_direct(delta_length * delta_length, emitter_context.emittance_dir, mesh);
+    emitter_context.color = eval_emitter_direct(emitter_context.emittance_dir, material) / emitter_context.emitter_pdf;
+
+    return emitter_context;
+}
+fn sample_random_emitter_direct(origin: vec3f, rng_sample: vec2f) -> EmitterContext {
+    let light = u32(rng_sample.x * f32(arrayLength(light_buffer)));
+
+    let emitter_context = sample_emitter_direct(origin, light, rng_sample);
+
+    emitter_context.color *= f32(arrayLength(light_buffer));
+    return emitter_context;
 }
 fn mi_weight(a: f32, b: f32) -> f32 {
     return (a + b) / 2.0;
@@ -582,7 +636,7 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>, metropolis_st
         let bsdf_context = sample_bsdf(incident_dir, next_random_2d(rng_state), material);
 
         if is_emitter(material) {
-            radiance += eval_emitter(incident_dir, material) * throughput;
+            radiance += eval_emitter_direct(incident_dir, material) * throughput;
         }
 
         var probability_to_die = max(0.01, length(bsdf_context.color));
@@ -628,26 +682,25 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
                 vec3f(0.0),
             );
             let bsdf_pdf = eval_bsdf_pdf(bsdf_context, material);
-            let emitter_pdf = direct_emitter_pdf(incident_dir, hit_info.mesh_index);
+            let emitter_pdf = emitter_pdf_direct(incident_dir, hit_info.mesh_index);
             let weight = mi_weight(bsdf_pdf, emitter_pdf);
 
-            radiance += throughput * eval_emitter(incident_dir) * weight;
+            radiance += throughput * eval_emitter_direct(incident_dir) * weight;
         }
 
         // direct illumination
 
-        let emitter_context = sample_direct_emitter(next_random_2d(rng_state));
+        let emitter_context = sample_random_emitter_direct(next_random_2d(rng_state));
         let bsdf_context = BSDFContext(
             incident_dir,
-            emitter_context.outgoing_dir,
+            to_local(local_frame, emitter_context.world_incident_dir),
             1.0,
             vec2f(1.0),
             vec3f(0.0),
         );
 
-        let emitter_pdf = direct_emitter_pdf(emitter_context.incident_dir, emitter_context.mesh_index);
         let bsdf_pdf = eval_bsdf_pdf(bsdf_context, material);
-        let weight = mi_weight(emitter_pdf, bsdf_pdf);
+        let weight = mi_weight(emitter_context.emitter_pdf, bsdf_pdf);
 
         let contribution = 
             throughput
@@ -656,7 +709,7 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
             * abs(cos_theta(incident_dir))
             * weight;
 
-        let shadow_ray_hit_info = trace_ray(Ray(hit_info.intersection, -to_world(emitter_context.outgoing_dir, local_frame)));
+        let shadow_ray_hit_info = trace_ray(Ray(hit_info.intersection, emitter_context.world_incident_dir));
         if shadow_ray_hit_info.hit {
             radiance += contribution;
         }
