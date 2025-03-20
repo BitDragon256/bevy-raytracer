@@ -92,12 +92,14 @@ pub struct RaytracingMaterial {
 
 #[derive(ShaderType)]
 pub struct RaytracingLight {
+    pub face_index: u32,
     pub mesh_index: u32,
 }
 
 impl RaytracingLight {
-    pub fn new(mesh_index: u32) -> Self {
+    pub fn new(face_index: u32, mesh_index: u32) -> Self {
         Self {
+            face_index,
             mesh_index,
         }
     }

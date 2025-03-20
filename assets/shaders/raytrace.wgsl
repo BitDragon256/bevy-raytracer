@@ -88,6 +88,7 @@ struct NEMesh {
     bvh_size: u32,
     material_offset: u32,
     transform_index: u32,
+    surface_area: f32,
 }
 struct NEVertex {
     position: vec3f,
@@ -558,11 +559,13 @@ fn is_emitter(material: Material) -> bool {
     return dot(material.radiance, material.radiance) != 0.0;
 }
 fn eval_emitter_direct(emittance_dir: vec3f, material: Material) -> vec3f {
-    return material.radiance * cos_theta(emittance_dir);
+    if cos_theta(emittance_dir) > 0.0 {
+        return material.radiance;
+    }
+    return vec3f(0.0);
 }
-fn emitter_pdf_direct(square_distance: f32, emittance_dir: vec3f, mesh: NEMesh) -> vec3f {
-    // return square_distance / (mesh.surface_area * cos_theta(emittance_dir));
-    return 0.5;
+fn emitter_pdf_direct(square_distance: f32, emittance_dir: vec3f, mesh: NEMesh) -> f32 {
+    return square_distance / (mesh.surface_area * cos_theta(emittance_dir));
 }
 fn sample_emitter_direct(origin: vec3f, light: Light, rng_sample: vec2f) -> EmitterContext {
     let mesh = mesh_buffer[light.mesh_index];
@@ -582,12 +585,12 @@ fn sample_emitter_direct(origin: vec3f, light: Light, rng_sample: vec2f) -> Emit
 
     let local_frame = create_frame(n);
 
-    let emitter_context = EmitterContext();
+    var emitter_context = EmitterContext();
     emitter_context.light = light;
     emitter_context.emittance_origin = p;
 
     // TODO find better way of calculating length and square length
-    let delta = p - origin;
+    let delta = origin - p;
     let delta_length = length(delta);
     emitter_context.world_incident_dir = delta / delta_length;
     emitter_context.emittance_dir = to_local(emitter_context.world_incident_dir, local_frame);
@@ -597,11 +600,11 @@ fn sample_emitter_direct(origin: vec3f, light: Light, rng_sample: vec2f) -> Emit
     return emitter_context;
 }
 fn sample_random_emitter_direct(origin: vec3f, rng_sample: vec2f) -> EmitterContext {
-    let light = u32(rng_sample.x * f32(arrayLength(light_buffer)));
+    let light = light_buffer[u32(rng_sample.x * f32(arrayLength(&light_buffer)))];
 
-    let emitter_context = sample_emitter_direct(origin, light, rng_sample);
+    var emitter_context = sample_emitter_direct(origin, light, rng_sample);
 
-    emitter_context.color *= f32(arrayLength(light_buffer));
+    emitter_context.color *= f32(arrayLength(&light_buffer));
     return emitter_context;
 }
 fn mi_weight(a: f32, b: f32) -> f32 {
@@ -674,59 +677,56 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
         let material = material_buffer[hit_info.material_index];
 
         if is_emitter(material) {
+            // radiance += throughput * eval_emitter_direct(incident_dir, material);
+        }
+
+        // direct illumination
+        {
+            let emitter_context = sample_random_emitter_direct(hit_info.intersection, next_random_2d(rng_state));
             let bsdf_context = BSDFContext(
                 incident_dir,
-                incident_dir,
+                to_local(emitter_context.world_incident_dir, local_frame),
                 1.0,
                 vec2f(1.0),
                 vec3f(0.0),
             );
+
             let bsdf_pdf = eval_bsdf_pdf(bsdf_context, material);
-            let emitter_pdf = emitter_pdf_direct(incident_dir, hit_info.mesh_index);
-            let weight = mi_weight(bsdf_pdf, emitter_pdf);
+            let weight = mi_weight(emitter_context.emitter_pdf, bsdf_pdf);
+            if true {
+                // return to_local(emitter_context.world_incident_dir, local_frame);
+                // return vec3f(emitter_context.color);
+                // return vec3f(cos_theta(emitter_context.emittance_dir));
+            }
 
-            radiance += throughput * eval_emitter_direct(incident_dir) * weight;
-        }
+            let contribution = 
+                throughput
+                * emitter_context.color
+                * eval_bsdf(bsdf_context, material)
+                * abs(cos_theta(incident_dir))
+                * weight;
 
-        // direct illumination
-
-        let emitter_context = sample_random_emitter_direct(next_random_2d(rng_state));
-        let bsdf_context = BSDFContext(
-            incident_dir,
-            to_local(local_frame, emitter_context.world_incident_dir),
-            1.0,
-            vec2f(1.0),
-            vec3f(0.0),
-        );
-
-        let bsdf_pdf = eval_bsdf_pdf(bsdf_context, material);
-        let weight = mi_weight(emitter_context.emitter_pdf, bsdf_pdf);
-
-        let contribution = 
-            throughput
-            * emitter_context.color
-            * eval_bsdf(bsdf_context)
-            * abs(cos_theta(incident_dir))
-            * weight;
-
-        let shadow_ray_hit_info = trace_ray(Ray(hit_info.intersection, emitter_context.world_incident_dir));
-        if shadow_ray_hit_info.hit {
-            radiance += contribution;
+            let shadow_ray_hit_info = trace_ray(Ray(hit_info.intersection, emitter_context.world_incident_dir));
+            if shadow_ray_hit_info.hit {
+                radiance += contribution;
+            }
         }
 
         // continue with bsdf
-        let bsdf_context = sample_bsdf(incident_dir, next_random_2d(rng_state), material);
-        throughput *= bsdf_context.color;
+        {
+            let bsdf_context = sample_bsdf(incident_dir, next_random_2d(rng_state), material);
+            throughput *= bsdf_context.color;
 
-        if bounce >= camera.min_bounces {
-            let probability_to_die = max(0.01, length(bsdf_context.color));
-            if next_random(rng_state) > probability_to_die {
-                break;
+            if bounce >= camera.min_bounces {
+                let probability_to_die = max(0.01, length(bsdf_context.color));
+                if next_random(rng_state) > probability_to_die {
+                    break;
+                }
+                throughput /= probability_to_die;
             }
-            throughput /= probability_to_die;
-        }
 
-        ray = Ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
+            ray = Ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
+        }
     }
 
     return radiance;

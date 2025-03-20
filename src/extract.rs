@@ -13,6 +13,7 @@ pub struct GpuNEMesh {
     pub bvh_size: u32,
     pub material_offset: u32,
     pub transform_index: u32,
+    pub surface_area: f32,
 }
 
 #[derive(ShaderType, Component, Clone, Debug)]

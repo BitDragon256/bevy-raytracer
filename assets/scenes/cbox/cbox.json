@@ -5,9 +5,9 @@
     "up": [0, 1, 0],
 
     "fov": 39.3077,
-    "sample_count": 16,
+    "sample_count": 4,
     "sampler": "independent",
-    "max_bounces": 3,
+    "max_bounces": 5,
     "min_bounces": 2
   },
   "meshes": [
@@ -59,7 +59,7 @@
       }
     },
     {
-      "_invisible": 42,
+      "invisible": 42,
       "object": "meshes/bunny.obj",
       "bsdf": {
         "type": "diffuse",

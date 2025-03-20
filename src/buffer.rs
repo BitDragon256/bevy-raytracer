@@ -76,7 +76,8 @@ pub fn fill_buffers(
         let mut flattened_bvh = mesh.bvh.flatten_custom(&GpuBvhNode::from_bvh);
 
         if material.radiance.length() > 0f32 {
-            lights.push(RaytracingLight::new(all_meshes.len() as u32));
+            let mut mesh_lights = (0..mesh.faces.len()).map(|i| RaytracingLight::new(i as u32, all_meshes.len() as u32)).collect::<Vec<_>>();
+            lights.append(&mut mesh_lights);
         }
 
         all_meshes.push(GpuNEMesh {
@@ -86,6 +87,7 @@ pub fn fill_buffers(
             bvh_size: flattened_bvh.len() as u32,
             material_offset: materials.len() as u32,
             transform_index: transforms.len() as u32,
+            surface_area: mesh.faces.iter().map(|f| 1.0).sum()
         });
 
         gpu_bvh.append(&mut flattened_bvh);
