@@ -1,0 +1,669 @@
+<scene>
+	<!-- Independent sample generator, 1 sample per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="1"/>
+	</sampler>
+
+	<!-- Use the direct illumination integrator -->
+	<integrator type="direct"/>
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="-11, 3.5, 0"
+			        origin="15, 2, 0"
+			        up="0, 1, 0"/>
+		</transform>
+
+		<!-- Field of view: 40 degrees -->
+		<float name="fov" value="40"/>
+
+		<!-- 800x600 pixels -->
+		<integer name="width" value="800"/>
+		<integer name="height" value="600"/>
+	</camera>
+
+	<!-- Illuminate using point lights -->
+	<emitter type="point">
+		<color name="power" value="500,250,250"/>
+		<transform name="toWorld">
+			<translate value = "-8,5,0"/>
+		</transform>
+	</emitter>
+	<emitter type="point">
+		<color name="power" value="125,125,250"/>
+		<transform name="toWorld">
+			<translate value="8,5,0"/>
+		</transform>
+	</emitter>
+
+	<mesh type="obj">
+		<string name="filename" value="./meshes/sponza.obj"/>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value=".8,.8,.8"/>
+			<texture type="bitmaptexture">
+				<string name="filename" value="textures/bricks.exr"/>
+			</texture>
+		</bsdf>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value="./meshes/dragon_simplified.obj"/>
+		<transform name="toWorld">
+			<scale value="0.05,0.05,0.05"/>
+			<rotate axis="0,1,0" angle="20"/>
+		</transform>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value=".8,.4,.4"/>
+			<texture type="checkerboard">
+				<float name="uvscale" value="20.0"/>
+				<color name="color0" value=".8,.8,.8"/>
+				<color name="color1" value=".4,.4,.4"/>
+			</texture>
+		</bsdf>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value="./meshes/teapot.obj"/>
+		<transform name="toWorld">
+			<scale value="0.01,0.01,0.01"/>
+			<rotate axis="0,1,0" angle="-60"/>
+			<translate value="5,0,-2"/>
+		</transform>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.9,0.9,0.6"/>
+		</bsdf>
+	</mesh>
+
+	<!-- (not so) virtual point lights -->
+	<emitter type="point"><color name="power" value="0.41383,0.358778,0.600709"/><transform name="toWorld"><translate value="9.55686,0.0933117,-2.04521"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.332492,0.253105,0.397062"/><transform name="toWorld"><translate value="7.36557,0.0933119,-0.795126"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.521314,0.443042,0.817923"/><transform name="toWorld"><translate value="11.0665,0.0933121,0.94619"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.136098,0.0872562,0.115263"/><transform name="toWorld"><translate value="11.9801,0.0933118,-1.54229"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.549027,0.504835,0.988699"/><transform name="toWorld"><translate value="10.9173,5.72757,-0.376741"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.342606,0.26918,0.462487"/><transform name="toWorld"><translate value="10.9272,5.6319,-0.354018"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.525238,0.748879"/><transform name="toWorld"><translate value="-6.70084,5.28515,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.560263,0.521314,0.978212"/><transform name="toWorld"><translate value="12.8561,0.376235,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.341957,0.311312,0.509645"/><transform name="toWorld"><translate value="12.6524,0.093313,7.07119"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.54341,0.489106,0.856123"/><transform name="toWorld"><translate value="7.0288,0.0933117,-2.52651"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.428062,0.683101"/><transform name="toWorld"><translate value="8.39727,5.36793,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.999661,0.351147,0.262295"/><transform name="toWorld"><translate value="3.1359,0.093311,-6.92403"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.50021,1.14374,1.04263"/><transform name="toWorld"><translate value="-8.78448,5.51955,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.56588,0.515696,0.936268"/><transform name="toWorld"><translate value="10.9272,5.12698,0.114167"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.234972,0.172128,0.248314"/><transform name="toWorld"><translate value="10.2178,4.11051,6.5669"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.44791,0.827661"/><transform name="toWorld"><translate value="6.93213,3.58885,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.336003,0.264635,0.441311"/><transform name="toWorld"><translate value="16.218,2.25233,5.96915"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.235596,0.170565,0.252116"/><transform name="toWorld"><translate value="13.5846,0.0933129,6.69109"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.44791,0.780473"/><transform name="toWorld"><translate value="10.0459,2.06545,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.204303,0.135824,0.184291"/><transform name="toWorld"><translate value="14.555,0.0933127,5.4045"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.185849,0.136414,0.253354"/><transform name="toWorld"><translate value="5.94587,0.0933118,-1.59729"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.537792,0.463265,0.837398"/><transform name="toWorld"><translate value="16.218,0.935516,-0.391816"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.335595,0.261718,0.436281"/><transform name="toWorld"><translate value="15.4148,0.0933119,-0.794863"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.414699,0.447194"/><transform name="toWorld"><translate value="14.787,3.2512,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.359092,0.353012"/><transform name="toWorld"><translate value="15.6188,0.0933128,5.74606"/></transform></emitter>
+	<emitter type="point"><color name="power" value="96.0307,38.8166,33.6382"/><transform name="toWorld"><translate value="10.6772,6.9735,2.56377"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.47862,0.906307"/><transform name="toWorld"><translate value="10.9272,4.38227,1.86361"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.245279,0.204961,0.337254"/><transform name="toWorld"><translate value="12.8895,0.0933119,-0.605667"/></transform></emitter>
+	<emitter type="point"><color name="power" value="50.9615,18.7613,13.2789"/><transform name="toWorld"><translate value="-11.5728,5.25352,2.06124"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.443042,0.390236,0.744146"/><transform name="toWorld"><translate value="10.1196,0.0933113,-4.70539"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.149169,0.0984908,0.141364"/><transform name="toWorld"><translate value="8.99962,0.0933114,-4.48988"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.54341,0.453154,0.827661"/><transform name="toWorld"><translate value="4.6609,0.0933121,0.934599"/></transform></emitter>
+	<emitter type="point"><color name="power" value="142.747,65.6286,63.5838"/><transform name="toWorld"><translate value="-2.52276,6.96803,-2.6615"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.920476,0.300615,0.215091"/><transform name="toWorld"><translate value="4.17248,4.82331,5.95716"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.583482,0.532175,0.988699"/><transform name="toWorld"><translate value="7.53306,0.0933112,-5.46192"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.31965,0.544624,0.400565"/><transform name="toWorld"><translate value="10.6707,2.79302,2.58998"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,0.931527,0.600021"/><transform name="toWorld"><translate value="6.94943,2.87924,2.85162"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.443042,0.385742,0.649395"/><transform name="toWorld"><translate value="8.77398,0.0933118,-1.07647"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.438173,0.744146"/><transform name="toWorld"><translate value="10.9272,4.53448,-1.69994"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.571872,0.549027,0.978212"/><transform name="toWorld"><translate value="7.30175,5.69913,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.352952,0.292743,0.468806"/><transform name="toWorld"><translate value="10.6055,3.20091,-2.64028"/></transform></emitter>
+	<emitter type="point"><color name="power" value="16.7583,12.6639,18.8072"/><transform name="toWorld"><translate value="6.46489,3.23863,2.50558"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.408544,0.325382,0.483959"/><transform name="toWorld"><translate value="4.18693,0.0933129,6.18235"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.390236,0.320578,0.53929"/><transform name="toWorld"><translate value="12.2121,0.0933127,4.90758"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.14138,0.368784,0.251865"/><transform name="toWorld"><translate value="-0.449794,5.88331,3.15914"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.583482,0.499592,0.92653"/><transform name="toWorld"><translate value="11.3514,2.65714,-7.04451"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.217291,0.153782,0.22581"/><transform name="toWorld"><translate value="6.72239,0.0933112,-5.98912"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.247014,0.198327,0.291658"/><transform name="toWorld"><translate value="7.96751,4.82331,3.70377"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.44791,0.817923"/><transform name="toWorld"><translate value="16.218,1.91822,-3.11262"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.276426,0.219909,0.328887"/><transform name="toWorld"><translate value="11.912,2.23782,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.571872,0.532175,0.978212"/><transform name="toWorld"><translate value="6.40869,4.08703,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.521314,0.468134,0.817923"/><transform name="toWorld"><translate value="9.02899,0.0933124,3.07548"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.598672,0.504601,0.87057"/><transform name="toWorld"><translate value="10.1028,5.41347,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.443042,0.79021"/><transform name="toWorld"><translate value="5.33854,0.0933119,-0.766228"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0998061,0.0877751,0.119936"/><transform name="toWorld"><translate value="6.7697,0.0933123,2.44684"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.458022,0.423567,0.753134"/><transform name="toWorld"><translate value="15.8292,0.0933121,1.01228"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0952142,0.0795007,0.105411"/><transform name="toWorld"><translate value="15.8878,0.926935,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.514818,0.562477"/><transform name="toWorld"><translate value="14.9088,0.093313,6.9928"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.438173,0.762122"/><transform name="toWorld"><translate value="8.01092,3.06873,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.802333,0.308489,0.207931"/><transform name="toWorld"><translate value="6.56767,0.093312,0.19215"/></transform></emitter>
+	<emitter type="point"><color name="power" value="120.449,58.91,51.3636"/><transform name="toWorld"><translate value="-6.04239,4.88794,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="27.0393,22.4972,34.7103"/><transform name="toWorld"><translate value="0.302187,4.82331,4.26722"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.458022,0.41383,0.762122"/><transform name="toWorld"><translate value="9.61133,0.0933118,-1.38165"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.100487,0.0715537,0.102442"/><transform name="toWorld"><translate value="10.3819,0.0933118,-1.81815"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.453154,0.780473"/><transform name="toWorld"><translate value="10.9272,5.00919,-1.89858"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.280762,0.204229,0.297631"/><transform name="toWorld"><translate value="5.52057,2.06441,7.22094"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.463265,0.771484"/><transform name="toWorld"><translate value="6.76134,5.48593,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.453154,0.390236,0.726544"/><transform name="toWorld"><translate value="11.1355,0.0933123,1.91894"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.180789,0.130245,0.181577"/><transform name="toWorld"><translate value="2.56967,5.25571,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.06278,0.886084,0.780473"/><transform name="toWorld"><translate value="0.293277,0.474585,-7.57983"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.64882,0.621297,0.51371"/><transform name="toWorld"><translate value="-0.0806654,0.133311,-7.44059"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.31848,0.258756,0.415915"/><transform name="toWorld"><translate value="2.81416,0.0933121,0.524565"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.54341,0.489106,0.856123"/><transform name="toWorld"><translate value="8.32417,0.0933122,1.16939"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.361654,0.28563,0.385841"/><transform name="toWorld"><translate value="6.89867,5.38878,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.206609,0.141909,0.165414"/><transform name="toWorld"><translate value="8.77636,1.47325,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.532175,0.47862,0.837398"/><transform name="toWorld"><translate value="9.88939,0.0933128,6.07518"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.04181,0.967726,0.906307"/><transform name="toWorld"><translate value="-3.27681,5.25248,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.245986,0.202688,0.325273"/><transform name="toWorld"><translate value="8.18197,5.21658,3.18149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.385742,0.316458,0.517194"/><transform name="toWorld"><translate value="2.71375,5.38264,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.41383,0.744146"/><transform name="toWorld"><translate value="13.8186,0.0933118,-1.4139"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.332183,0.278244,0.439656"/><transform name="toWorld"><translate value="16.218,3.54279,-1.86674"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.265747,0.222595,0.351725"/><transform name="toWorld"><translate value="4.64496,2.40084,-1.0363"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.308127,0.236417,0.3654"/><transform name="toWorld"><translate value="14.4897,2.58529,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.18611,0.116073,0.154689"/><transform name="toWorld"><translate value="16.218,1.15856,4.9945"/></transform></emitter>
+	<emitter type="point"><color name="power" value="58.1029,23.1856,16.9575"/><transform name="toWorld"><translate value="-6.16763,0.093312,0.224432"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.613592,0.613592,1.22718"/><transform name="toWorld"><translate value="4.51813,1.87152,-1.28263"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.44791,0.817923"/><transform name="toWorld"><translate value="9.64617,5.17127,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.44421,0.578457,0.446986"/><transform name="toWorld"><translate value="-8.37088,5.88331,3.09838"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,0.761237,0.309209"/><transform name="toWorld"><translate value="4.42332,0.0933121,0.457273"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,0.67748,0.263345"/><transform name="toWorld"><translate value="6.35985,0.0933122,1.44511"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.06349,0.391644,0.273039"/><transform name="toWorld"><translate value="5.94593,3.92018,3.48523"/></transform></emitter>
+	<emitter type="point"><color name="power" value="139.826,65.6286,57.5954"/><transform name="toWorld"><translate value="-9.55253,0.556749,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.31297,0.557587,0.461646"/><transform name="toWorld"><translate value="5.56751,4.28227,3.63298"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.793038,0.311192,0.213354"/><transform name="toWorld"><translate value="8.59294,0.0933129,6.39942"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.423567,0.699954"/><transform name="toWorld"><translate value="10.9068,2.78885,2.41807"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.316458,0.269645,0.53929"/><transform name="toWorld"><translate value="7.58279,0.0933114,-4.01189"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.662128,0.61906,1.14374"/><transform name="toWorld"><translate value="9.00718,4.57538,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.57749,0.554645,1.00967"/><transform name="toWorld"><translate value="8.82461,0.0933121,0.904592"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.421838,0.376985,0.616254"/><transform name="toWorld"><translate value="10.72,1.93605,2.59204"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.54148,0.634369"/><transform name="toWorld"><translate value="1.7247,0.093312,0.0241525"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.6748,0.708942,0.616813"/><transform name="toWorld"><translate value="16.218,1.39783,-2.63091"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.11462,0.447243,0.364426"/><transform name="toWorld"><translate value="16.0201,0.0933115,-3.2969"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.69555,0.258344,0.196626"/><transform name="toWorld"><translate value="16.218,1.04293,-3.14767"/></transform></emitter>
+	<emitter type="point"><color name="power" value="11.3898,7.57667,9.71865"/><transform name="toWorld"><translate value="2.27293,10.0284,-4.69994"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.430489,0.322024,0.553294"/><transform name="toWorld"><translate value="4.9327,4.72966,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.560263,0.510453,0.946754"/><transform name="toWorld"><translate value="10.4807,0.0933124,2.88459"/></transform></emitter>
+	<emitter type="point"><color name="power" value="92.9464,39.6778,32.1443"/><transform name="toWorld"><translate value="-9.34822,4.96494,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.23216,0.173974,0.269812"/><transform name="toWorld"><translate value="5.96196,0.093312,0.0216925"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.47862,0.41383,0.683101"/><transform name="toWorld"><translate value="11.2996,2.74239,-2.15328"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.289088,0.210552,0.267503"/><transform name="toWorld"><translate value="10.0476,0.0933126,4.17984"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.186326,0.11895,0.131335"/><transform name="toWorld"><translate value="10.1405,3.91141,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.515696,0.443042,0.780473"/><transform name="toWorld"><translate value="7.83036,0.0933123,2.03534"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.515696,0.458022,0.856123"/><transform name="toWorld"><translate value="3.53524,0.0933114,-4.43553"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.571872,0.532175,0.95724"/><transform name="toWorld"><translate value="9.38105,5.286,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.333964,0.287135,0.458755"/><transform name="toWorld"><translate value="10.9272,4.92574,0.795279"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.219816,0.175253,0.262082"/><transform name="toWorld"><translate value="9.65116,5.16734,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.504835,0.423567,0.641156"/><transform name="toWorld"><translate value="5.40203,0.093312,-0.139981"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.28599,0.227086"/><transform name="toWorld"><translate value="10.1496,0.0933116,-3.18365"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.571872,0.554645,1.00967"/><transform name="toWorld"><translate value="12.7549,0.0933117,-2.23517"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.392604,0.353694,0.589632"/><transform name="toWorld"><translate value="9.63193,4.31004,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.504835,0.453154,0.817923"/><transform name="toWorld"><translate value="6.93724,0.573325,2.96866"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.285202,0.219828,0.355046"/><transform name="toWorld"><translate value="10.3826,0.0933127,5.24805"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.56588,0.515696,0.876346"/><transform name="toWorld"><translate value="10.9272,4.86195,-1.27282"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.185541,0.135219,0.205501"/><transform name="toWorld"><translate value="10.1747,4.87998,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.119587,0.0789659,0.110878"/><transform name="toWorld"><translate value="10.8092,0.0933119,-0.579582"/></transform></emitter>
+	<emitter type="point"><color name="power" value="119.086,50.7307,44.4016"/><transform name="toWorld"><translate value="-13.2892,8.73719,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.236828,0.167844,0.254205"/><transform name="toWorld"><translate value="8.92569,0.0933124,2.89306"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.537792,0.473377,0.79021"/><transform name="toWorld"><translate value="9.66616,0.0933121,0.691267"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.228241,0.161495,0.214374"/><transform name="toWorld"><translate value="12.9601,0.093312,-0.300565"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.464991,0.529379"/><transform name="toWorld"><translate value="6.4278,4.36629,4.16696"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.22421,0.167733,0.270091"/><transform name="toWorld"><translate value="10.1585,5.65361,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.483863,0.837398"/><transform name="toWorld"><translate value="8.7321,5.41515,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.228537,0.183067,0.276519"/><transform name="toWorld"><translate value="-2.08304,5.44611,3.18149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.354471,0.320578,0.55427"/><transform name="toWorld"><translate value="7.13092,0.093312,0.252452"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.185849,0.146619,0.277884"/><transform name="toWorld"><translate value="8.37375,0.0933125,3.90924"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.126319,0.0904917,0.158752"/><transform name="toWorld"><translate value="10.7399,4.37076,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0849325,0.0534643,0.0817791"/><transform name="toWorld"><translate value="10.9272,4.30962,-2.48538"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.601084,0.526557,0.967726"/><transform name="toWorld"><translate value="10.9272,4.28944,1.07571"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.358948,0.280762,0.458347"/><transform name="toWorld"><translate value="10.6818,2.64351,-2.39451"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.79164,0.856123,0.744146"/><transform name="toWorld"><translate value="-4.47676,5.22388,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.208714,0.140315,0.243776"/><transform name="toWorld"><translate value="16.218,0.227331,-1.43568"/></transform></emitter>
+	<emitter type="point"><color name="power" value="86.4342,38.7843,29.9727"/><transform name="toWorld"><translate value="-10.9581,0.924547,2.33946"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.463265,0.428062,0.799198"/><transform name="toWorld"><translate value="13.9387,0.0933119,-0.554946"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.178436,0.127547,0.192629"/><transform name="toWorld"><translate value="15.2746,4.26037,-1.91909"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.446275,0.567013"/><transform name="toWorld"><translate value="7.82083,0.0933122,1.47435"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.318588,0.253043,0.421452"/><transform name="toWorld"><translate value="6.50502,3.88649,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.443042,0.399599,0.717555"/><transform name="toWorld"><translate value="10.9272,3.62478,1.86515"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.358328,0.323574,0.581235"/><transform name="toWorld"><translate value="9.30624,0.0933123,2.27297"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.473377,0.408962,0.674487"/><transform name="toWorld"><translate value="8.62298,0.0933117,-2.1858"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.350112,0.270435,0.431374"/><transform name="toWorld"><translate value="5.08957,0.0933119,-1.06856"/></transform></emitter>
+	<emitter type="point"><color name="power" value="62.8559,21.485,14.0147"/><transform name="toWorld"><translate value="-13.114,4.82331,6.22558"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.185849,0.176955,0.314586"/><transform name="toWorld"><translate value="10.9272,5.33434,-1.46416"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.029255,0.0229877,0.0294716"/><transform name="toWorld"><translate value="2.63837,0.78384,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.433305,0.780473"/><transform name="toWorld"><translate value="6.61367,2.87208,2.4743"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.308557,0.253043,0.40205"/><transform name="toWorld"><translate value="7.25231,0.0933121,0.412479"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.571872,0.532175,0.978212"/><transform name="toWorld"><translate value="6.34069,0.0933111,-6.28214"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.601084,0.549027,0.999185"/><transform name="toWorld"><translate value="10.0491,3.4735,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.471064,0.413379,0.671815"/><transform name="toWorld"><translate value="9.97063,4.28018,6.60682"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.293955,0.223039,0.299168"/><transform name="toWorld"><translate value="4.95725,0.0933129,6.25317"/></transform></emitter>
+	<emitter type="point"><color name="power" value="134.081,64.2654,58.2284"/><transform name="toWorld"><translate value="-9.85396,10.9466,2.49082"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.458022,0.390236,0.699954"/><transform name="toWorld"><translate value="7.63243,0.0933118,-1.22156"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.317798,0.243517,0.395433"/><transform name="toWorld"><translate value="11.1204,4.51893,-0.417559"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.187761,0.126871,0.165279"/><transform name="toWorld"><translate value="11.8404,0.0933123,2.07615"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.91448,0.837398,0.708942"/><transform name="toWorld"><translate value="2.78106,0.581849,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.458022,0.808935"/><transform name="toWorld"><translate value="10.9272,4.59464,0.0116726"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.121056,0.0939303,0.133605"/><transform name="toWorld"><translate value="8.56598,5.31431,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="18.994,14.1481,21.6224"/><transform name="toWorld"><translate value="-0.236672,6.33792,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.428062,0.385742,0.69134"/><transform name="toWorld"><translate value="10.5429,0.0933125,3.88785"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.205436,0.173907,0.24825"/><transform name="toWorld"><translate value="12.0424,0.0933126,4.19843"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.27339,0.247924,0.440795"/><transform name="toWorld"><translate value="10.9272,5.48439,0.897943"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.181949,0.148052,0.237831"/><transform name="toWorld"><translate value="7.0855,0.0933119,-0.811525"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.532175,0.468134,0.817923"/><transform name="toWorld"><translate value="10.4111,2.30293,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.40069,0.314756,0.515995"/><transform name="toWorld"><translate value="6.43071,4.6595,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.67398,1.2501,1.15498"/><transform name="toWorld"><translate value="-6.39127,5.7094,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.613068,0.571872,1.05311"/><transform name="toWorld"><translate value="6.61117,0.0933119,-0.39734"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.362213,0.304924,0.517044"/><transform name="toWorld"><translate value="8.41249,3.36166,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.478437,0.64855"/><transform name="toWorld"><translate value="6.89484,0.0933113,-5.22831"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.601084,0.526557,0.967726"/><transform name="toWorld"><translate value="6.0579,4.42119,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.388984,0.305106,0.483659"/><transform name="toWorld"><translate value="7.33159,0.0933121,0.49614"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.473377,0.423567,0.762122"/><transform name="toWorld"><translate value="9.13243,0.0933114,-4.37412"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.264194,0.207958,0.347755"/><transform name="toWorld"><translate value="9.61587,4.58923,-5.72886"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.163057,0.118804,0.181179"/><transform name="toWorld"><translate value="8.65506,0.0933111,-6.31757"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.453154,0.418699,0.744146"/><transform name="toWorld"><translate value="3.6246,0.0933119,-0.829365"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.109483,0.0872562,0.140981"/><transform name="toWorld"><translate value="2.51365,0.0933121,0.542382"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.54341,0.483863,0.92653"/><transform name="toWorld"><translate value="10.8174,0.173909,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.425866,0.364315,0.622965"/><transform name="toWorld"><translate value="10.7369,0.0933117,-2.42123"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.280306,0.220048,0.324562"/><transform name="toWorld"><translate value="10.9272,0.505155,-2.4752"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.206937,0.154285,0.20131"/><transform name="toWorld"><translate value="3.7551,0.0933121,0.933608"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.263457,0.224207,0.337906"/><transform name="toWorld"><translate value="5.35454,4.41798,3.37816"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.114362,0.0889492,0.104606"/><transform name="toWorld"><translate value="8.42574,0.0933128,5.91845"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.179638,0.139017,0.213554"/><transform name="toWorld"><translate value="1.36956,0.0933113,-4.73889"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.443042,0.799198"/><transform name="toWorld"><translate value="10.4841,3.51185,2.76942"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.336003,0.270411,0.441354"/><transform name="toWorld"><translate value="9.12355,4.63469,3.99031"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.228377,0.161481,0.229944"/><transform name="toWorld"><translate value="4.62599,0.0933112,-6.07435"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.458022,0.837398"/><transform name="toWorld"><translate value="9.94837,4.42197,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.269864,0.224874,0.377401"/><transform name="toWorld"><translate value="8.37148,0.0933129,6.86158"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.179602,0.129895,0.180869"/><transform name="toWorld"><translate value="8.53936,1.09635,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.131858,0.0976523,0.130614"/><transform name="toWorld"><translate value="10.9272,5.03934,1.96609"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.404147,0.321057,0.503913"/><transform name="toWorld"><translate value="4.63745,0.0933121,0.349255"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.473377,0.41383,0.699954"/><transform name="toWorld"><translate value="6.96783,5.71386,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.57361,1.1782,1.07558"/><transform name="toWorld"><translate value="10.9272,5.44007,-0.0513833"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.380106,0.307235,0.466872"/><transform name="toWorld"><translate value="3.26112,5.43331,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.373064,0.285726,0.483959"/><transform name="toWorld"><translate value="10.266,0.0933123,2.21456"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.248284,0.16686,0.246233"/><transform name="toWorld"><translate value="10.6978,4.40599,6.17309"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.247014,0.19388,0.3565"/><transform name="toWorld"><translate value="6.58103,2.69331,-2.44104"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.583482,0.532175,0.988699"/><transform name="toWorld"><translate value="5.82892,0.0933117,-1.87089"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.239765,0.177511,0.249535"/><transform name="toWorld"><translate value="3.79176,1.69389,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.453154,0.404468,0.726544"/><transform name="toWorld"><translate value="7.18171,0.0933122,1.2417"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.177481,0.137571,0.210478"/><transform name="toWorld"><translate value="14.4013,0.0933121,0.753904"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.454876,0.567872"/><transform name="toWorld"><translate value="11.7933,0.093312,0.260755"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.408962,0.649395"/><transform name="toWorld"><translate value="8.20982,2.56847,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.571872,0.499592,0.906307"/><transform name="toWorld"><translate value="10.0036,0.0933113,-5.23046"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.277419,0.214181,0.3319"/><transform name="toWorld"><translate value="10.3577,0.621577,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.198583,0.13219,0.17697"/><transform name="toWorld"><translate value="10.5762,0.0933111,-6.58993"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.663,0.233139,0.149892"/><transform name="toWorld"><translate value="6.79012,0.0933125,3.83523"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,0.808557,0.405309"/><transform name="toWorld"><translate value="16.218,0.888193,-2.08298"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.458022,0.404468,0.632917"/><transform name="toWorld"><translate value="11.6456,0.0933119,-1.06609"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.510453,0.489106,0.866609"/><transform name="toWorld"><translate value="7.38053,5.03234,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.47862,0.44791,0.762122"/><transform name="toWorld"><translate value="7.43331,0.0933111,-6.23931"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.279507,0.225267,0.343476"/><transform name="toWorld"><translate value="10.6378,3.05533,-2.55354"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.287022,0.263054,0.42544"/><transform name="toWorld"><translate value="4.8459,5.40936,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="79.881,31.3499,27.6329"/><transform name="toWorld"><translate value="-10.932,12.0697,-0.46008"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.396792,0.307404,0.503913"/><transform name="toWorld"><translate value="8.04568,5.88331,2.59768"/></transform></emitter>
+	<emitter type="point"><color name="power" value="17.5302,12.0687,18.9201"/><transform name="toWorld"><translate value="8.6213,6.11891,2.77351"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.524087,0.218023,0.179503"/><transform name="toWorld"><translate value="6.54551,0.0933111,-6.21796"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.532175,0.463265,0.866609"/><transform name="toWorld"><translate value="10.9272,5.36419,-0.908219"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.384839,0.308316,0.51201"/><transform name="toWorld"><translate value="10.8424,4.92225,-0.456617"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.595092,0.554645,0.999185"/><transform name="toWorld"><translate value="10.5972,1.84839,2.78121"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,1.2172,0.37305"/><transform name="toWorld"><translate value="6.33809,0.463517,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.191935,0.151956,0.248485"/><transform name="toWorld"><translate value="6.93604,1.74638,-2.71062"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.11846,0.0907434,0.134071"/><transform name="toWorld"><translate value="9.98181,0.0933119,-0.678812"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0865312,0.0616772,0.0818301"/><transform name="toWorld"><translate value="10.6099,1.04707,-2.69912"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.35827,0.559361,0.426135"/><transform name="toWorld"><translate value="3.85877,0.0933112,-6.07818"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.06446,0.42553,0.295673"/><transform name="toWorld"><translate value="8.86165,5.67069,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0744966,0.0573452,0.0821189"/><transform name="toWorld"><translate value="4.2529,0.093313,7.11093"/></transform></emitter>
+	<emitter type="point"><color name="power" value="79.767,39.8835,39.8835"/><transform name="toWorld"><translate value="-0.954656,2.19516,-0.731424"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.214588,0.16324,0.256534"/><transform name="toWorld"><translate value="9.33275,0.093312,0.263685"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.166494,0.112068,0.154947"/><transform name="toWorld"><translate value="2.77335,4.94153,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.315173,0.276647,0.441596"/><transform name="toWorld"><translate value="6.12624,4.29969,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.463265,0.385742,0.641156"/><transform name="toWorld"><translate value="10.9272,4.62459,1.59483"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.324829,0.235438,0.357833"/><transform name="toWorld"><translate value="2.25409,0.0933122,1.11755"/></transform></emitter>
+	<emitter type="point"><color name="power" value="21.8001,17.0961,25.3908"/><transform name="toWorld"><translate value="10.9272,10.393,1.0448"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.45309,0.665874,0.58498"/><transform name="toWorld"><translate value="-5.60857,5.42046,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.47862,0.418699,0.726544"/><transform name="toWorld"><translate value="5.20943,0.0933119,-1.01894"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.342606,0.278656,0.443447"/><transform name="toWorld"><translate value="5.70537,4.1008,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.08526,0.906307,0.827661"/><transform name="toWorld"><translate value="-8.0758,5.67879,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.194931,0.165532,0.277884"/><transform name="toWorld"><translate value="5.28068,4.86834,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.13668,0.104427,0.158752"/><transform name="toWorld"><translate value="10.9272,5.13249,-1.05242"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.662128,0.571872,1.08682"/><transform name="toWorld"><translate value="7.95693,2.02058,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.45004,0.352952,0.620888"/><transform name="toWorld"><translate value="7.8748,0.0933129,6.1426"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.521314,0.499592,0.906307"/><transform name="toWorld"><translate value="9.18451,0.0933115,-3.28096"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.357894,0.308342,0.500504"/><transform name="toWorld"><translate value="10.5972,0.968149,-2.81986"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.209005,0.162602,0.242798"/><transform name="toWorld"><translate value="8.63369,0.0933118,-1.60196"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.358778,0.324698,0.561761"/><transform name="toWorld"><translate value="9.68281,4.86968,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.179494,0.137005,0.208084"/><transform name="toWorld"><translate value="9.59025,4.89127,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="111.296,53.165,47.7852"/><transform name="toWorld"><translate value="-10.6628,7.26844,2.60899"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.515696,0.463265,0.827661"/><transform name="toWorld"><translate value="3.71236,0.093312,-0.0936838"/></transform></emitter>
+	<emitter type="point"><color name="power" value="49.8544,35.3302,54.5629"/><transform name="toWorld"><translate value="4.59527,2.3101,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.532175,0.47862,0.837398"/><transform name="toWorld"><translate value="6.40825,5.24494,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.537792,0.47862,0.936268"/><transform name="toWorld"><translate value="12.6423,2.28202,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.18279,0.12001,0.178635"/><transform name="toWorld"><translate value="12.3624,2.79959,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.554645,0.510453,0.906307"/><transform name="toWorld"><translate value="10.9272,4.1635,-1.2799"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.365069,0.311556,0.494752"/><transform name="toWorld"><translate value="6.45522,0.0933129,6.79861"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.44791,0.808935"/><transform name="toWorld"><translate value="6.19586,3.76228,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.510453,0.458022,0.827661"/><transform name="toWorld"><translate value="9.44895,0.0933124,2.72118"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.256203,0.184218,0.237899"/><transform name="toWorld"><translate value="2.57306,0.0933122,1.31311"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,0.959017,0.645162"/><transform name="toWorld"><translate value="8.63204,4.73516,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.191935,0.154578,0.225453"/><transform name="toWorld"><translate value="10.9272,5.09751,1.39008"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.494349,0.847135"/><transform name="toWorld"><translate value="11.3481,0.093311,-6.83739"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.408544,0.318624,0.522841"/><transform name="toWorld"><translate value="4.94562,4.74499,2.51721"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.423567,0.744146"/><transform name="toWorld"><translate value="8.71159,5.20819,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.690592,0.267254,0.212486"/><transform name="toWorld"><translate value="-9.12975,5.4529,3.18149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.635658,0.259919,0.186548"/><transform name="toWorld"><translate value="-8.35161,5.63195,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.390236,0.320578,0.517194"/><transform name="toWorld"><translate value="5.88765,0.093312,0.328762"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.473377,0.423567,0.753134"/><transform name="toWorld"><translate value="13.5867,0.0933118,-1.7113"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.549027,0.526557,0.936268"/><transform name="toWorld"><translate value="7.23233,0.0933126,4.0593"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.369146,0.324984,0.511107"/><transform name="toWorld"><translate value="10.6513,1.56044,2.66071"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.318677,0.257226,0.369604"/><transform name="toWorld"><translate value="9.59094,3.15398,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="16.4954,9.57904,14.4251"/><transform name="toWorld"><translate value="15.3342,4.82331,4.78282"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.47862,0.433305,0.780473"/><transform name="toWorld"><translate value="10.0614,0.0933115,-3.90563"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.305214,0.24183,0.369657"/><transform name="toWorld"><translate value="16.218,2.22455,-4.74724"/></transform></emitter>
+	<emitter type="point"><color name="power" value="67.0793,25.4792,18.089"/><transform name="toWorld"><translate value="-10.6357,4.82331,4.15914"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.400404,0.356991,0.596534"/><transform name="toWorld"><translate value="-4.00628,5.562,3.18149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.240808,0.207477,0.342487"/><transform name="toWorld"><translate value="11.7227,0.093312,-0.376548"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.153562,0.122582,0.184789"/><transform name="toWorld"><translate value="11.5131,0.84347,-2.30763"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.119146,0.0877464,0.117839"/><transform name="toWorld"><translate value="6.92774,3.46015,7.01627"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.225719,0.193983,0.300123"/><transform name="toWorld"><translate value="9.96116,0.0933127,5.361"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.154961,0.122376,0.1675"/><transform name="toWorld"><translate value="10.0499,2.36491,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.583482,0.54341,0.999185"/><transform name="toWorld"><translate value="6.17404,0.093313,6.88772"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.421942,0.353959,0.570823"/><transform name="toWorld"><translate value="6.68681,0.911631,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.697267,0.216951,0.140378"/><transform name="toWorld"><translate value="4.94062,0.093312,-0.146736"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.379487,0.297885,0.477255"/><transform name="toWorld"><translate value="7.3619,0.0933116,-2.78147"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.236809,0.170178,0.240026"/><transform name="toWorld"><translate value="6.93724,0.312234,-2.90115"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.549027,0.504835,0.876346"/><transform name="toWorld"><translate value="8.7235,0.0933121,0.687114"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.310168,0.256855,0.370992"/><transform name="toWorld"><translate value="11.2499,3.5661,6.9629"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.204154,0.153385,0.209589"/><transform name="toWorld"><translate value="8.5009,0.0933126,4.38538"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.9774,0.916044,0.837398"/><transform name="toWorld"><translate value="10.5972,1.85047,-2.83216"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.947664,0.344635,0.255349"/><transform name="toWorld"><translate value="7.94859,0.0933113,-5.11115"/></transform></emitter>
+	<emitter type="point"><color name="power" value="56.839,21.8472,17.6598"/><transform name="toWorld"><translate value="-12.1701,9.40107,-7.13644"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.443042,0.780473"/><transform name="toWorld"><translate value="10.358,0.0933124,2.54089"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.399599,0.337244,0.649395"/><transform name="toWorld"><translate value="6.86346,3.17634,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.453154,0.438173,0.79021"/><transform name="toWorld"><translate value="10.9272,2.90955,-2.16587"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.292072,0.253105,0.411696"/><transform name="toWorld"><translate value="8.56151,4.54699,-3.11135"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.165003,0.125749,0.163332"/><transform name="toWorld"><translate value="7.06124,2.66366,-2.70494"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.554645,0.515696,0.946754"/><transform name="toWorld"><translate value="16.218,1.82363,0.130223"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.269062,0.210005,0.323597"/><transform name="toWorld"><translate value="8.47111,0.0933124,2.48548"/></transform></emitter>
+	<emitter type="point"><color name="power" value="141.287,61.539,55.648"/><transform name="toWorld"><translate value="-12.0286,2.74224,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.463265,0.404468,0.699954"/><transform name="toWorld"><translate value="8.79241,1.02279,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.318042,0.238968,0.364673"/><transform name="toWorld"><translate value="7.83347,0.093313,7.01248"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.216169,0.139553,0.187857"/><transform name="toWorld"><translate value="7.89154,0.237112,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.423567,0.399599,0.771484"/><transform name="toWorld"><translate value="10.9272,4.65446,2.13276"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.203859,0.145617,0.211786"/><transform name="toWorld"><translate value="11.2168,0.0933128,5.75631"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.57749,0.504835,0.916044"/><transform name="toWorld"><translate value="3.35152,0.0933113,-5.03592"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.136593,0.0944301,0.115913"/><transform name="toWorld"><translate value="8.62707,2.90274,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.521314,0.483863,0.886084"/><transform name="toWorld"><translate value="9.65869,5.30886,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.346949,0.282568,0.45083"/><transform name="toWorld"><translate value="10.9272,5.11858,-1.53828"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.209558,0.150666,0.223984"/><transform name="toWorld"><translate value="10.9016,5.75144,-1.58646"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.373064,0.321806,0.546709"/><transform name="toWorld"><translate value="6.58525,0.0933119,-0.439069"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.149225,0.128723,0.218683"/><transform name="toWorld"><translate value="4.5175,1.85221,-0.682254"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.468134,0.404468,0.726544"/><transform name="toWorld"><translate value="6.8589,0.635513,2.63646"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.282755,0.231068,0.387395"/><transform name="toWorld"><translate value="10.7777,1.33992,2.53429"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.174513,0.127606,0.185658"/><transform name="toWorld"><translate value="6.93724,1.51523,2.74525"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.504835,0.428062,0.808935"/><transform name="toWorld"><translate value="7.97841,0.0933114,-4.61258"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.36535,0.298634,0.511249"/><transform name="toWorld"><translate value="10.9085,4.52488,-1.17328"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.237977,0.176439,0.27909"/><transform name="toWorld"><translate value="7.58648,0.0933116,-2.76832"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.241359,0.174033,0.257634"/><transform name="toWorld"><translate value="4.80948,4.82331,4.43444"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.489106,0.468134,0.847135"/><transform name="toWorld"><translate value="9.23684,0.0933119,-0.79034"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.433305,0.708942"/><transform name="toWorld"><translate value="7.70439,5.24675,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.54341,0.458022,0.79021"/><transform name="toWorld"><translate value="10.9983,0.0933121,0.523012"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.213591,0.13629,0.166109"/><transform name="toWorld"><translate value="11.6443,0.0933126,4.08329"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.537792,0.489106,0.92653"/><transform name="toWorld"><translate value="10.4846,2.5862,3.0597"/></transform></emitter>
+	<emitter type="point"><color name="power" value="17.553,13.6786,25.3246"/><transform name="toWorld"><translate value="-2.31358,3.61954,-2.49603"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.321152,0.24961,0.395664"/><transform name="toWorld"><translate value="7.30245,0.0933119,-0.959977"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.443042,0.404468,0.641156"/><transform name="toWorld"><translate value="8.2252,0.093312,0.0439528"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0891276,0.0720458,0.101746"/><transform name="toWorld"><translate value="5.90564,3.8095,2.89417"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.443042,0.399599,0.717555"/><transform name="toWorld"><translate value="6.80826,4.16467,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.30113,0.243896,0.391712"/><transform name="toWorld"><translate value="5.76768,0.0933115,-3.79085"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.342982,0.267478,0.435586"/><transform name="toWorld"><translate value="7.49634,0.0933127,5.14129"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.337244,0.316458,0.58498"/><transform name="toWorld"><translate value="10.9272,4.98565,1.87594"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.532175,0.458022,0.79021"/><transform name="toWorld"><translate value="3.90015,0.0933117,-2.45471"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.213174,0.162399,0.236796"/><transform name="toWorld"><translate value="2.61112,0.0933113,-5.21947"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.433305,0.367579,0.657634"/><transform name="toWorld"><translate value="11.0802,0.0933113,-4.87836"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.174276,0.108237,0.14557"/><transform name="toWorld"><translate value="8.23318,0.0933114,-4.58024"/></transform></emitter>
+	<emitter type="point"><color name="power" value="129.894,60.2245,53.7979"/><transform name="toWorld"><translate value="-7.67107,9.84875,6.1472"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.571872,0.468134,0.79021"/><transform name="toWorld"><translate value="3.65529,5.57052,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.356862,0.264468,0.40205"/><transform name="toWorld"><translate value="6.71851,0.0933119,-0.973034"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.458022,0.808935"/><transform name="toWorld"><translate value="5.66164,0.0933122,1.1851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.174485,0.120498,0.16659"/><transform name="toWorld"><translate value="10.9289,0.0933118,-1.74713"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.395105,0.358778,0.561761"/><transform name="toWorld"><translate value="10.4033,3.66341,3.00578"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.196298,0.149958,0.197494"/><transform name="toWorld"><translate value="6.93724,1.99747,2.89307"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.140514,0.0976776,0.119287"/><transform name="toWorld"><translate value="10.5081,0.0933121,0.433847"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.44791,0.428062,0.771484"/><transform name="toWorld"><translate value="10.2022,4.42306,-2.44284"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.408962,0.349977,0.624678"/><transform name="toWorld"><translate value="8.25653,5.39988,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.33328,0.255647,0.377308"/><transform name="toWorld"><translate value="14.1377,0.093312,-0.154136"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.515696,0.906307"/><transform name="toWorld"><translate value="9.84421,0.0933118,-1.07536"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.433305,0.780473"/><transform name="toWorld"><translate value="7.14974,5.29278,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.164986,0.125016,0.170694"/><transform name="toWorld"><translate value="8.79794,5.51816,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.248355,0.18039,0.282567"/><transform name="toWorld"><translate value="2.95496,1.36453,0.78207"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.425376,0.361654,0.565557"/><transform name="toWorld"><translate value="4.12508,4.68213,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.549246,0.649287"/><transform name="toWorld"><translate value="4.36664,0.0933115,-3.2848"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.473377,0.404468,0.780473"/><transform name="toWorld"><translate value="7.29285,0.0933118,-1.46047"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.83209,0.817923,0.708942"/><transform name="toWorld"><translate value="1.37727,0.385631,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.15579,0.472463,0.352221"/><transform name="toWorld"><translate value="2.31282,0.0933113,-5.18971"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.494349,0.866609"/><transform name="toWorld"><translate value="8.53296,0.0933122,1.489"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.224471,0.158958,0.213773"/><transform name="toWorld"><translate value="14.0521,0.093312,0.202619"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.18701,0.745619,0.884461"/><transform name="toWorld"><translate value="16.218,1.49844,0.830151"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.448697,0.489331"/><transform name="toWorld"><translate value="15.1367,0.0933122,1.07848"/></transform></emitter>
+	<emitter type="point"><color name="power" value="13.6122,11.151,15.441"/><transform name="toWorld"><translate value="4.29627,9.14109,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.504835,0.44791,0.856123"/><transform name="toWorld"><translate value="6.67867,3.83185,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.01767,0.378564,0.294277"/><transform name="toWorld"><translate value="1.36134,5.88331,3.17094"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.54341,0.489106,0.876346"/><transform name="toWorld"><translate value="9.67169,2.851,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.21858,0.95724,0.847135"/><transform name="toWorld"><translate value="-6.08904,5.69097,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.489106,0.423567,0.79021"/><transform name="toWorld"><translate value="14.3437,0.0933119,-0.685622"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.384444,0.392615"/><transform name="toWorld"><translate value="14.9908,0.0933117,-2.0972"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.368078,0.33974"/><transform name="toWorld"><translate value="16.218,1.92087,-3.21529"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.235048,0.106541"/><transform name="toWorld"><translate value="14.602,0.0933113,-5.28041"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.321931,0.264468,0.451819"/><transform name="toWorld"><translate value="10.7867,0.212025,2.52533"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.198692,0.151088,0.235396"/><transform name="toWorld"><translate value="10.4004,0.0933123,1.90749"/></transform></emitter>
+	<emitter type="point"><color name="power" value="91.0725,39.6778,37.1698"/><transform name="toWorld"><translate value="-6.53153,1.62103,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.428062,0.390236,0.665874"/><transform name="toWorld"><translate value="10.9272,3.73806,1.77382"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.17418,0.113122,0.134357"/><transform name="toWorld"><translate value="5.70584,0.0933117,-2.06183"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.504835,0.473377,0.827661"/><transform name="toWorld"><translate value="8.78409,0.0933113,-4.83559"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.24304,0.184132,0.243574"/><transform name="toWorld"><translate value="16.218,1.19823,-2.54428"/></transform></emitter>
+	<emitter type="point"><color name="power" value="131.257,56.9625,53.165"/><transform name="toWorld"><translate value="-6.92276,7.12144,2.54991"/></transform></emitter>
+	<emitter type="point"><color name="power" value="12.781,10.9639,16.6687"/><transform name="toWorld"><translate value="0.336522,10.0621,6.87649"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.433305,0.753134"/><transform name="toWorld"><translate value="10.2767,5.33454,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.322024,0.250293,0.360938"/><transform name="toWorld"><translate value="2.69144,0.093312,-0.205424"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.515696,0.44791,0.817923"/><transform name="toWorld"><translate value="8.09413,5.55412,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.69427,0.744146,0.577115"/><transform name="toWorld"><translate value="-10.5724,5.60528,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.241302,0.0783026,0.0488894"/><transform name="toWorld"><translate value="-10.4569,5.49701,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.169703,0.118387,0.128379"/><transform name="toWorld"><translate value="6.94769,0.0933119,-0.406652"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.560263,0.521314,0.936268"/><transform name="toWorld"><translate value="7.20797,2.38344,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.417735,0.339567,0.559109"/><transform name="toWorld"><translate value="9.62408,0.0933122,1.47287"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.41383,0.726544"/><transform name="toWorld"><translate value="10.612,3.18187,2.71855"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.328876,0.272384,0.443447"/><transform name="toWorld"><translate value="8.32893,0.0933127,4.69335"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.433305,0.771484"/><transform name="toWorld"><translate value="7.79084,0.0933116,-3.10313"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.068537,0.0656216,0.0806628"/><transform name="toWorld"><translate value="4.16669,4.82331,3.18169"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.443042,0.780473"/><transform name="toWorld"><translate value="10.8985,4.69326,-0.880754"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.308557,0.244668,0.387759"/><transform name="toWorld"><translate value="5.34511,0.0933121,0.5939"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.176275,0.120124,0.153835"/><transform name="toWorld"><translate value="5.33133,0.319752,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.100798,0.0840748,0.118486"/><transform name="toWorld"><translate value="10.9272,5.15871,0.427927"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.38037,1.04263,0.866609"/><transform name="toWorld"><translate value="-9.39735,5.64451,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.489106,0.433305,0.847135"/><transform name="toWorld"><translate value="10.7466,0.0933122,1.65387"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.186311,0.128944,0.180364"/><transform name="toWorld"><translate value="9.03382,0.0933121,0.373951"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.5891,0.521314,0.895821"/><transform name="toWorld"><translate value="10.9272,5.58169,-0.132532"/></transform></emitter>
+	<emitter type="point"><color name="power" value="170.498,82.8147,77.3619"/><transform name="toWorld"><translate value="-10.9128,5.53254,-2.31421"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.230509,0.207477,0.353909"/><transform name="toWorld"><translate value="6.35393,1.95069,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.094678,0.0747753,0.0901275"/><transform name="toWorld"><translate value="2.53724,1.50601,-2.98482"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.443042,0.423567,0.744146"/><transform name="toWorld"><translate value="11.5721,1.25405,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.152258,0.119801,0.167973"/><transform name="toWorld"><translate value="8.92992,0.0933111,-6.82419"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.42745,0.581026,0.45338"/><transform name="toWorld"><translate value="3.46052,5.88331,2.68086"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.489106,0.916044"/><transform name="toWorld"><translate value="6.78018,0.0933119,-0.462071"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.324984,0.260793,0.439012"/><transform name="toWorld"><translate value="15.1202,4.35007,-3.12487"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.213906,0.164524,0.250803"/><transform name="toWorld"><translate value="10.6275,0.0933119,-0.444751"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.399599,0.34567,0.592845"/><transform name="toWorld"><translate value="5.9934,4.33097,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.270107,0.222938,0.360966"/><transform name="toWorld"><translate value="10.8942,3.05877,2.40849"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.187413,0.139118,0.203925"/><transform name="toWorld"><translate value="9.73659,0.0933117,-1.88742"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.150931,0.10281,0.144398"/><transform name="toWorld"><translate value="16.218,3.0069,-1.73606"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.72779,0.263938,0.177029"/><transform name="toWorld"><translate value="11.7566,0.0933122,1.09705"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.504835,0.47862,0.895821"/><transform name="toWorld"><translate value="9.62226,0.0933112,-5.75558"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.332284,0.289088,0.523145"/><transform name="toWorld"><translate value="9.40041,1.09822,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.47862,0.866609"/><transform name="toWorld"><translate value="3.98322,0.0933121,0.459378"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.353865,0.308486,0.506086"/><transform name="toWorld"><translate value="6.18202,4.45274,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.504835,0.443042,0.753134"/><transform name="toWorld"><translate value="7.00593,5.12038,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.193914,0.123759,0.151876"/><transform name="toWorld"><translate value="4.12167,0.0933118,-1.74665"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.497309,0.639629"/><transform name="toWorld"><translate value="6.52736,4.82331,3.82594"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.489106,0.463265,0.866609"/><transform name="toWorld"><translate value="11.2151,3.25397,7.08712"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.237777,0.168771,0.245771"/><transform name="toWorld"><translate value="8.34116,0.0933126,4.12929"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.44791,0.408962,0.632917"/><transform name="toWorld"><translate value="10.9272,4.26446,-2.15347"/></transform></emitter>
+	<emitter type="point"><color name="power" value="20.6273,16.5881,21.4336"/><transform name="toWorld"><translate value="4.20381,8.00934,-2.58933"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.504835,0.453154,0.808935"/><transform name="toWorld"><translate value="10.9272,5.16238,-1.04555"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.321931,0.247376,0.387681"/><transform name="toWorld"><translate value="4.99322,0.093313,7.12175"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.216455,0.154368,0.216367"/><transform name="toWorld"><translate value="10.5823,5.28652,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.308342,0.26414,0.359639"/><transform name="toWorld"><translate value="13.4858,0.093312,-0.239246"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.468134,0.428062,0.753134"/><transform name="toWorld"><translate value="6.01509,0.0933117,-2.19156"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.499592,0.936268"/><transform name="toWorld"><translate value="7.34314,0.0933121,0.741116"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.36535,0.301756,0.51705"/><transform name="toWorld"><translate value="11.0174,1.01036,-2.29166"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.220673,0.17239,0.282257"/><transform name="toWorld"><translate value="6.84725,0.0933127,4.94843"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.489106,0.418699,0.753134"/><transform name="toWorld"><translate value="16.218,1.05818,-1.26674"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.147451,0.0997222,0.138399"/><transform name="toWorld"><translate value="16.218,0.388079,-2.49962"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.443042,0.404468,0.708942"/><transform name="toWorld"><translate value="8.58292,0.0933127,5.1189"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.159685,0.109506,0.150327"/><transform name="toWorld"><translate value="8.72128,4.30147,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.54341,0.532175,0.936268"/><transform name="toWorld"><translate value="8.80736,3.19132,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.300096,0.270765,0.376473"/><transform name="toWorld"><translate value="15.2883,0.0933129,6.828"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.193421,0.151115,0.191545"/><transform name="toWorld"><translate value="14.8947,0.924682,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.89351,0.817923,0.735157"/><transform name="toWorld"><translate value="-5.28651,5.28784,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.332183,0.25824,0.418857"/><transform name="toWorld"><translate value="2.55595,0.0933114,-4.4576"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.44791,0.780473"/><transform name="toWorld"><translate value="10.7355,1.55549,-2.57358"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.433227,0.335008,0.520119"/><transform name="toWorld"><translate value="10.7572,0.162974,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.276267,0.193513,0.283932"/><transform name="toWorld"><translate value="10.924,0.0933128,6.02708"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.54341,0.468134,0.847135"/><transform name="toWorld"><translate value="4.9561,5.06083,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.468134,0.404468,0.657634"/><transform name="toWorld"><translate value="14.4772,0.093312,0.208153"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.385159,0.289526,0.456298"/><transform name="toWorld"><translate value="16.218,1.25565,0.0150639"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.270063,0.174875,0.2433"/><transform name="toWorld"><translate value="14.4003,0.0933121,0.860171"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.327654,0.305018"/><transform name="toWorld"><translate value="7.09678,0.0933118,-1.66119"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.458022,0.395105,0.641156"/><transform name="toWorld"><translate value="7.68206,1.16955,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.321152,0.249256,0.366285"/><transform name="toWorld"><translate value="7.15754,0.0933128,6.10905"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,0.777188,0.443618"/><transform name="toWorld"><translate value="-3.23634,5.88331,2.56629"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.187254,0.16748,0.290617"/><transform name="toWorld"><translate value="16.218,1.77913,-0.890875"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.127274,0.102221,0.158648"/><transform name="toWorld"><translate value="9.72671,4.56689,-5.79469"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.372923,0.311556,0.51201"/><transform name="toWorld"><translate value="8.99862,0.0933118,-1.67048"/></transform></emitter>
+	<emitter type="point"><color name="power" value="9.4564,6.23149,7.99131"/><transform name="toWorld"><translate value="5.31508,9.76595,3.18149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="97.9074,43.2818,38.0237"/><transform name="toWorld"><translate value="-12.9178,0.0933119,-0.389818"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.510453,0.458022,0.827661"/><transform name="toWorld"><translate value="10.4931,0.0933117,-2.00133"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.255984,0.188125,0.279224"/><transform name="toWorld"><translate value="10.5894,0.0933115,-3.34255"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.595092,0.554645,0.999185"/><transform name="toWorld"><translate value="10.9272,5.46023,-2.3878"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.95642,0.906307,0.808935"/><transform name="toWorld"><translate value="-9.83794,5.41302,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.375666,0.28224,0.446731"/><transform name="toWorld"><translate value="6.12274,1.4137,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.226904,0.148838,0.198935"/><transform name="toWorld"><translate value="8.80702,0.0933128,5.46556"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.521314,0.47862,0.827661"/><transform name="toWorld"><translate value="12.316,0.0933122,1.54219"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.443042,0.79021"/><transform name="toWorld"><translate value="11.2182,3.83725,-1.62605"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.468134,0.408962,0.708942"/><transform name="toWorld"><translate value="7.9497,5.0742,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.489106,0.428062,0.744146"/><transform name="toWorld"><translate value="10.9272,4.71995,0.29975"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.344822,0.318337"/><transform name="toWorld"><translate value="3.02129,0.093312,-0.048024"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.428062,0.799198"/><transform name="toWorld"><translate value="10.8118,0.0933127,5.14344"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.131769,0.089767,0.121965"/><transform name="toWorld"><translate value="9.01868,2.69883,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="70.302,26.0978,19.4213"/><transform name="toWorld"><translate value="-1.42314,4.75867,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.423567,0.726544"/><transform name="toWorld"><translate value="5.41465,0.0933115,-3.29561"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.29521,0.218195,0.339858"/><transform name="toWorld"><translate value="8.9562,4.48675,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.180182,0.113679,0.155077"/><transform name="toWorld"><translate value="8.2127,0.0933114,-4.52001"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.571872,0.532175,0.95724"/><transform name="toWorld"><translate value="8.97904,5.48207,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.882027,0.328027,0.227922"/><transform name="toWorld"><translate value="-3.83429,5.54148,3.18149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.38849,0.318185,0.529317"/><transform name="toWorld"><translate value="9.3192,0.0933129,6.56627"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.438173,0.363272,0.616813"/><transform name="toWorld"><translate value="8.08694,0.0933125,3.59732"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.310444,0.231657,0.356294"/><transform name="toWorld"><translate value="10.9272,4.84344,2.21521"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.15117,0.946754,0.827661"/><transform name="toWorld"><translate value="8.0642,0.0933127,5.3889"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.07874,0.379572,0.269379"/><transform name="toWorld"><translate value="7.2931,4.41182,4.24171"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.346581,0.26712,0.40359"/><transform name="toWorld"><translate value="7.1106,0.0933124,2.87605"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.223383,0.145821,0.207904"/><transform name="toWorld"><translate value="6.93724,0.192854,2.81011"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.429737,0.526116"/><transform name="toWorld"><translate value="16.218,0.692512,6.0454"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.376671,0.391199"/><transform name="toWorld"><translate value="14.9103,0.46378,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.322739,0.294437"/><transform name="toWorld"><translate value="16.218,0.444623,6.92484"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.571872,0.515696,0.92653"/><transform name="toWorld"><translate value="9.0451,1.20969,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.388694,0.314756,0.505791"/><transform name="toWorld"><translate value="8.49957,0.0933111,-6.61548"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.253183,0.177819,0.266726"/><transform name="toWorld"><translate value="8.11022,0.778048,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.160464,0.131457,0.216416"/><transform name="toWorld"><translate value="3.52255,0.0933118,-1.20596"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.466387,0.380803,0.651027"/><transform name="toWorld"><translate value="8.04635,5.88331,2.7819"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.504835,0.433305,0.762122"/><transform name="toWorld"><translate value="11.2195,0.0933122,1.05671"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0971756,0.0620319,0.0815687"/><transform name="toWorld"><translate value="16.218,0.293556,-4.90023"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.16079,0.464358,0.310525"/><transform name="toWorld"><translate value="5.69872,0.0933117,-2.29336"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,1.2273,0.547145"/><transform name="toWorld"><translate value="5.43827,0.28097,-2.17743"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,0.8927,0.248224"/><transform name="toWorld"><translate value="11.6926,2.26249,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.392635,0.328584,0.528388"/><transform name="toWorld"><translate value="6.9339,0.0933124,3.10825"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.224308,0.177288,0.272192"/><transform name="toWorld"><translate value="6.82555,0.107265,3.09987"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.631044,0.57749,1.05311"/><transform name="toWorld"><translate value="12.7279,0.693583,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.424291,0.35642,0.561524"/><transform name="toWorld"><translate value="15.6922,3.90026,-2.0454"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.171019,0.12278,0.136175"/><transform name="toWorld"><translate value="9.41483,5.07616,3.18149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="134.081,67.0405,61.539"/><transform name="toWorld"><translate value="-10.9128,4.58695,-0.444264"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.526557,0.463265,0.808935"/><transform name="toWorld"><translate value="7.14109,0.0933117,-2.40671"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.335783,0.252896,0.39716"/><transform name="toWorld"><translate value="6.50685,0.490354,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.47862,0.399599,0.665874"/><transform name="toWorld"><translate value="10.3385,3.76031,-2.75198"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.396944,0.288926,0.44102"/><transform name="toWorld"><translate value="6.48384,3.12406,-2.50618"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.264177,0.178322,0.25475"/><transform name="toWorld"><translate value="6.45731,3.11311,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.458022,0.808935"/><transform name="toWorld"><translate value="8.38368,0.0933121,0.472569"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.339567,0.267478,0.416712"/><transform name="toWorld"><translate value="8.74863,2.38818,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.218861,0.161558,0.219751"/><transform name="toWorld"><translate value="10.0637,0.0933114,-3.99027"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.473303,0.528547"/><transform name="toWorld"><translate value="10.9272,5.6276,0.876754"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.390438,0.344241"/><transform name="toWorld"><translate value="10.0577,1.86116,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="1.20038,0.519426,0.374425"/><transform name="toWorld"><translate value="3.81174,0.609926,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0315042,0.0120235,0.00629031"/><transform name="toWorld"><translate value="4.3422,0.0933112,-6.05699"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.337244,0.320578,0.55427"/><transform name="toWorld"><translate value="7.31989,5.4291,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.537792,0.489106,0.886084"/><transform name="toWorld"><translate value="10.9272,5.19192,0.160887"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.560263,0.489106,0.886084"/><transform name="toWorld"><translate value="6.90292,3.48159,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="92.892,39.1469,32.4167"/><transform name="toWorld"><translate value="-6.97775,0.0933117,-2.00809"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.438173,0.837398"/><transform name="toWorld"><translate value="6.07226,0.0933118,-1.48874"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.438173,0.358778,0.657634"/><transform name="toWorld"><translate value="10.8033,2.69331,-2.43783"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.158324,0.122629,0.188974"/><transform name="toWorld"><translate value="10.9272,2.71857,-2.37883"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.105369,0.0798766,0.107959"/><transform name="toWorld"><translate value="10.9115,2.70714,-2.42231"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.443042,0.799198"/><transform name="toWorld"><translate value="7.39328,0.0933122,1.5529"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.662128,0.283577,0.22785"/><transform name="toWorld"><translate value="-4.36127,5.14333,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.221976,0.156453,0.227982"/><transform name="toWorld"><translate value="4.28274,4.82331,5.58651"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.489106,0.443042,0.837398"/><transform name="toWorld"><translate value="10.9272,4.4496,1.93387"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.44791,0.808935"/><transform name="toWorld"><translate value="9.23739,2.30118,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.301756,0.24167,0.378398"/><transform name="toWorld"><translate value="6.75197,0.0933127,5.3248"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.395105,0.34155,0.569625"/><transform name="toWorld"><translate value="11.9778,0.0933119,-0.726959"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.160266,0.114094,0.144281"/><transform name="toWorld"><translate value="16.218,0.685029,-6.54554"/></transform></emitter>
+	<emitter type="point"><color name="power" value="88.2394,32.8823,26.7237"/><transform name="toWorld"><translate value="-10.4188,9.21002,-3.17851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.308407,0.29249,0.517194"/><transform name="toWorld"><translate value="6.35168,0.0933128,5.7429"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.174232,0.152386,0.24496"/><transform name="toWorld"><translate value="5.41691,1.22107,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.301586,0.235944,0.355893"/><transform name="toWorld"><translate value="7.30968,0.0933118,-1.40027"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.433305,0.771484"/><transform name="toWorld"><translate value="8.8856,0.0933119,-0.996404"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.273354,0.210199,0.334888"/><transform name="toWorld"><translate value="6.92132,2.25532,-2.69589"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0947664,0.0559881,0.0759956"/><transform name="toWorld"><translate value="15.3278,0.0933118,-1.60026"/></transform></emitter>
+	<emitter type="point"><color name="power" value="2.19611,1.05311,0.92653"/><transform name="toWorld"><translate value="-8.61835,5.59233,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.225794,0.181831,0.31141"/><transform name="toWorld"><translate value="6.12655,3.65221,3.21689"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.237437,0.204294,0.336682"/><transform name="toWorld"><translate value="10.5555,0.093312,0.271025"/></transform></emitter>
+	<emitter type="point"><color name="power" value="138.365,60.2245,55.0638"/><transform name="toWorld"><translate value="-7.38942,9.09087,-2.53465"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.380941,0.318042,0.528936"/><transform name="toWorld"><translate value="10.8949,5.78609,0.176789"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.494349,0.443042,0.799198"/><transform name="toWorld"><translate value="11.6568,2.56221,-7.06242"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.257554,0.212327,0.346918"/><transform name="toWorld"><translate value="11.9826,0.0933111,-6.15226"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.889865,0.327234,0.200649"/><transform name="toWorld"><translate value="11.34,0.0933119,-0.535214"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.44791,0.808935"/><transform name="toWorld"><translate value="16.218,2.12387,-2.9246"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.318588,0.255886,0.416712"/><transform name="toWorld"><translate value="15.4501,4.12782,-3.00483"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.209695,0.156181,0.232569"/><transform name="toWorld"><translate value="16.2124,0.0933121,0.378736"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.537792,0.499592,0.916044"/><transform name="toWorld"><translate value="6.51806,4.10564,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.357915,0.318588,0.529141"/><transform name="toWorld"><translate value="1.15294,0.522957,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.261446,0.20534,0.298934"/><transform name="toWorld"><translate value="0.709014,0.0933111,-6.81882"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.312339,0.284813,0.454277"/><transform name="toWorld"><translate value="10.8951,4.75237,0.759899"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.345413,0.268676,0.433406"/><transform name="toWorld"><translate value="10.71,0.0933122,1.1901"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.295422,0.210671,0.323489"/><transform name="toWorld"><translate value="8.15313,0.093312,0.0104908"/></transform></emitter>
+	<emitter type="point"><color name="power" value="115.191,52.5808,46.0812"/><transform name="toWorld"><translate value="-9.11558,0.0933124,2.54453"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.453154,0.433305,0.762122"/><transform name="toWorld"><translate value="16.218,0.0993354,1.20288"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.317739,0.273354,0.430554"/><transform name="toWorld"><translate value="16.214,0.0933122,1.19056"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.209136,0.166842,0.235039"/><transform name="toWorld"><translate value="9.46836,2.9181,-7.21851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.76699,0.588648,0.676195"/><transform name="toWorld"><translate value="10.8589,0.0933112,-5.58483"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.489106,0.423567,0.699954"/><transform name="toWorld"><translate value="8.01351,4.51348,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.510453,0.473377,0.847135"/><transform name="toWorld"><translate value="9.40614,0.0933116,-2.84997"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.196596,0.139428,0.153622"/><transform name="toWorld"><translate value="11.2621,0.0933111,-6.11883"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.0399913,0.0128639,0.00703484"/><transform name="toWorld"><translate value="-7.54231,5.4989,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.385801,0.317319,0.450319"/><transform name="toWorld"><translate value="2.64113,4.82331,6.10608"/></transform></emitter>
+	<emitter type="point"><color name="power" value="3.06796,0.837119,0.466795"/><transform name="toWorld"><translate value="-5.68391,5.17892,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.468134,0.423567,0.762122"/><transform name="toWorld"><translate value="9.73245,0.0933118,-1.30134"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.433305,0.167873,0.126209"/><transform name="toWorld"><translate value="-9.14482,5.42014,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.468134,0.418699,0.726544"/><transform name="toWorld"><translate value="11.2906,0.0933123,2.05699"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.271602,0.216352,0.344976"/><transform name="toWorld"><translate value="9.91064,0.0933122,1.31398"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.215494,0.177332,0.27049"/><transform name="toWorld"><translate value="6.64856,2.42243,-2.50011"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.483863,0.438173,0.79021"/><transform name="toWorld"><translate value="11.2049,2.13925,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.315173,0.26744,0.421342"/><transform name="toWorld"><translate value="9.36443,0.0933128,5.97573"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.264388,0.21168,0.283295"/><transform name="toWorld"><translate value="9.65929,3.11592,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="6.75298,4.81955,8.34772"/><transform name="toWorld"><translate value="-9.06389,3.94335,7.22149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.499592,0.44791,0.808935"/><transform name="toWorld"><translate value="7.19184,0.0933118,-1.7045"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.325418,0.261573,0.411577"/><transform name="toWorld"><translate value="6.52521,5.58281,2.52149"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.114405,0.0786123,0.0933987"/><transform name="toWorld"><translate value="10.1668,5.43116,-2.51851"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.421582,0.163327,0.105894"/><transform name="toWorld"><translate value="0.374574,0.535202,-7.57948"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.277487,0.0996868,0.0604961"/><transform name="toWorld"><translate value="0.440437,0.093311,-7.12776"/></transform></emitter>
+	<emitter type="point"><color name="power" value="0.211052,0.142478,0.184667"/><transform name="toWorld"><translate value="5.19676,4.82331,3.86893"/></transform></emitter>
+	<emitter type="point"><color name="power" value="7.58496,4.80027,6.47663"/><transform name="toWorld"><translate value="-2.41664,2.69331,2.43099"/></transform></emitter>
+</scene>

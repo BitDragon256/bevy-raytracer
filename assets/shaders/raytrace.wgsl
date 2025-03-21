@@ -684,7 +684,7 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
         let material = material_buffer[hit_info.material_index];
 
         if is_emitter(material) && false {
-            radiance += throughput * eval_emitter_direct(incident_dir, material);
+            // radiance += throughput * eval_emitter_direct(incident_dir, material);
         }
 
         // direct illumination
@@ -711,7 +711,7 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
                 throughput
                 * emitter_context.color
                 * eval_bsdf(bsdf_context, material)
-                * abs(cos_theta(incident_dir))
+                * abs(cos_theta(bsdf_context.outgoing_dir))
                 * weight;
 
             let shadow_ray_hit_info = trace_ray(Ray(hit_info.intersection, -emitter_context.world_emittance_dir));

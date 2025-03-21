@@ -1,0 +1,69 @@
+{
+    "camera": {
+        "origin": [15, 2, 0],
+        "target": [-11, 3.5, 0],
+        "up": [0, 1, 0],
+
+        "fov": 40,
+        "sample_count": 1,
+        "sampler": "independent",
+        "max_bounces": 1,
+        "min_bounces": 3
+    },
+    "meshes": [
+        {
+            "object": "meshes/sphere.triangulated.obj",
+            "bsdf": {
+                "type": "diffuse",
+                "albedo": [1.0, 1.0, 1.0],
+                "radiance": [500, 250, 250]
+            },
+            "transform": {
+                "translate": [-8, 5, 0],
+                "scale": [0.002, 0.002, 0.002]
+            }
+        },
+        {
+            "object": "meshes/sphere.triangulated.obj",
+            "bsdf": {
+                "type": "diffuse",
+                "albedo": [1.0, 1.0, 1.0],
+                "radiance": [125, 125, 250]
+            },
+            "transform": {
+                "translate": [8, 5, 0],
+                "scale": [0.002, 0.002, 0.002]
+            }
+        },
+        {
+            "object": "meshes/sponza.triangulated.obj",
+            "bsdf": {
+                "type": "diffuse",
+                "albedo": [0.8, 0.8, 0.8]
+            }
+        },
+        {
+            "object": "meshes/dragon_simplified.obj",
+            "bsdf": {
+                "type": "diffuse",
+                "albedo": [0.8, 0.4, 0.4]
+            },
+            "transform": {
+                "scale": [0.05, 0.05, 0.05],
+                "rotate": [0, 20, 0]
+            }
+        },
+        {
+            "object": "meshes/teapot.triangulated.obj",
+            "bsdf": {
+                "type": "diffuse",
+                "albedo": [0.9, 0.9, 0.6]
+            },
+            "transform": {
+                "scale": [0.01, 0.01, 0.01],
+                "rotate": [0, -60, 0],
+                "translate": [5, 0, -2]
+            }
+        }
+    ]
+}

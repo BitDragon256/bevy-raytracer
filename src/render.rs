@@ -26,7 +26,7 @@ use crate::types::{CellRef, NEMesh, NETriFace, NEVertex, RaytracingMaterial};
 pub fn setup(
     mut commands: Commands,
 ) {
-    load_scene(commands, "cbox/cbox.json");
+    load_scene(commands, "sponza/sponza.json");
     // load_scene(commands, "dragon/dragon.json");
     println!(">> example scene set up");
 }
