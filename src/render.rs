@@ -24,9 +24,10 @@ use crate::scene::load_scene;
 use crate::types::{CellRef, NEMesh, NETriFace, NEVertex, RaytracingMaterial};
 
 pub fn setup(
-    mut commands: Commands,
+    commands: Commands,
+    movement_settings: ResMut<MovementSettings>,
 ) {
-    load_scene(commands, "sponza/sponza.json");
+    load_scene(commands, movement_settings, "sponza/sponza.json");
     // load_scene(commands, "dragon/dragon.json");
     println!(">> example scene set up");
 }

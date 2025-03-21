@@ -32,7 +32,7 @@ fn intersect_triangle(ray: Ray, a: vec3f, b: vec3f, c: vec3f) -> HitInfo {
 	// At this stage we can compute t to find out where the intersection point is on the line.
 	let t = inv_det * dot(edge2, s_cross_edge1);
 
-	if t > EPSILON { // ray intersection
+	if t > ray.min && t < ray.max { // ray intersection
 		intersection.intersection = ray.origin + ray.direction * t;
 		intersection.hit = true;
 	}
@@ -43,14 +43,14 @@ fn intersect_triangle(ray: Ray, a: vec3f, b: vec3f, c: vec3f) -> HitInfo {
 	return intersection;
 }
 
-fn intersect_aabb(ray_origin: vec3f, ray_inv_dir: vec3f, box_min: vec3f, box_max: vec3f) -> bool {
+fn intersect_aabb(ray_origin: vec3f, ray_inv_dir: vec3f, ray_max: f32, box_min: vec3f, box_max: vec3f) -> bool {
     let t1 = (box_min - ray_origin) * ray_inv_dir;
     let t2 = (box_max - ray_origin) * ray_inv_dir;
 
     let tmin = max(max(min(t1.x, t2.x), min(t1.y, t2.y)), min(t1.z, t2.z));
     let tmax = min(min(max(t1.x, t2.x), max(t1.y, t2.y)), max(t1.z, t2.z));
 
-    return tmax >= tmin && tmax > 0;
+    return tmax >= tmin && tmax > 0 && tmin <= ray_max;
 }
 
 // #import "shaders/types.wgsl"::{
@@ -117,6 +117,20 @@ struct CellRef {
 struct Ray {
     origin: vec3f,
     direction: vec3f,
+    min: f32,
+    max: f32,
+}
+
+fn make_inf_ray(origin: vec3f, direction: vec3f) -> Ray {
+    return make_ray(origin, direction, INF);
+}
+fn make_ray(origin: vec3f, direction: vec3f, max: f32) -> Ray {
+    return Ray(
+        origin,
+        direction,
+        EPSILON,
+        max,
+    );
 }
 
 struct HitInfo {
@@ -218,6 +232,8 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
 
     let transform = transform_buffer[mesh.transform_index];
 
+    var mod_ray = ray;
+
     let inv_ray_dir = 1.0 / ray.direction;
 
     let bvh_offset = mesh.bvh_root;
@@ -233,17 +249,19 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
             let a = apply_transform(transform, vertex_buffer[face.a + mesh.vertex_offset].position);
             let b = apply_transform(transform, vertex_buffer[face.b + mesh.vertex_offset].position);
             let c = apply_transform(transform, vertex_buffer[face.c + mesh.vertex_offset].position);
-            let tri_hit_info = intersect_triangle(ray, a, b, c);
+            let tri_hit_info = intersect_triangle(mod_ray, a, b, c);
 
             if tri_hit_info.hit && tri_hit_info.distance < nearest_hit_info.distance {
                 nearest_hit_info = tri_hit_info;
                 nearest_hit_info.face_index = bvh_node.shape_index + mesh.face_offset;
                 nearest_hit_info.material_index = face.material_index + mesh.material_offset;
+
+                mod_ray.max = tri_hit_info.distance;
             }
 
             bvh_index = bvh_node.exit_index;
         }
-        else if intersect_aabb(ray.origin, inv_ray_dir, apply_transform(transform, bvh_node.min), apply_transform(transform, bvh_node.max)) {
+        else if intersect_aabb(mod_ray.origin + mod_ray.min * mod_ray.direction, inv_ray_dir, mod_ray.max - mod_ray.min, apply_transform(transform, bvh_node.min), apply_transform(transform, bvh_node.max)) {
             bvh_index = bvh_node.entry_index;
         } else {
             bvh_index = bvh_node.exit_index;
@@ -275,7 +293,7 @@ fn ray_from_uv(uv: vec2f) -> Ray {
     let right = cross(camera.direction, camera.up);
     let scale = tan(camera.fov * DEG2RAD * 0.5);
     let dir = normalize(camera.direction + (delta.x * camera.aspect * scale * right) + (delta.y * scale * camera.up));
-    return Ray(camera.position, dir);
+    return make_inf_ray(camera.position, dir);
 }
 
 fn reflect(v: vec3f) -> vec3f {
@@ -442,14 +460,17 @@ fn trace_ray(ray: Ray) -> HitInfo {
     nearest_hit_info.distance = INF;
 
     // move origin slightly to eliminate rounding errors
-    let mod_ray = Ray(ray.origin + ray.direction * 0.01, ray.direction);
+    var mod_ray = ray;
+    mod_ray.min = 0.01;
 
-    for (var mesh_index: u32 = 0; mesh_index < arrayLength(&mesh_buffer); mesh_index += 1u) {
+    for (var mesh_index: u32 = 0; mesh_index < arrayLength(&mesh_buffer); mesh_index++) {
         let mesh = mesh_buffer[mesh_index];
         let mesh_hit_info = intersect_mesh(mod_ray, mesh);
         if mesh_hit_info.hit && mesh_hit_info.distance < nearest_hit_info.distance {
             nearest_hit_info = mesh_hit_info;
             nearest_hit_info.mesh_index = mesh_index;
+
+            mod_ray.max = mesh_hit_info.distance;
         }
     }
     return nearest_hit_info;
@@ -573,11 +594,12 @@ fn sample_emitter_direct(origin: vec3f, light: Light, rng_sample: vec2f) -> Emit
     let mesh = mesh_buffer[light.mesh_index];
     let face = tri_face_buffer[mesh.face_offset + light.face_index];
     let material = material_buffer[face.material_index + mesh.material_offset];
+    let transform = transform_buffer[mesh.transform_index];
 
     // NOTE vertex access
-    let a = vertex_buffer[face.a + mesh.vertex_offset].position;
-    let b = vertex_buffer[face.b + mesh.vertex_offset].position;
-    let c = vertex_buffer[face.c + mesh.vertex_offset].position;
+    let a = apply_transform(transform, vertex_buffer[face.a + mesh.vertex_offset].position);
+    let b = apply_transform(transform, vertex_buffer[face.b + mesh.vertex_offset].position);
+    let c = apply_transform(transform, vertex_buffer[face.c + mesh.vertex_offset].position);
 
     let n = normalize(cross(b - a, c - a));
     let p = uniform_triangle_to_triangle(
@@ -659,7 +681,7 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>, metropolis_st
         }
 
         throughput *= bsdf_context.color / probability_to_die;
-        ray = Ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
+        ray = make_inf_ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
     }
 
     return radiance;
@@ -683,8 +705,8 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
 
         let material = material_buffer[hit_info.material_index];
 
-        if is_emitter(material) && false {
-            // radiance += throughput * eval_emitter_direct(incident_dir, material);
+        if is_emitter(material) {
+            radiance += throughput * eval_emitter_direct(incident_dir, material);
         }
 
         // direct illumination
@@ -701,7 +723,7 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
             let bsdf_pdf = eval_bsdf_pdf(bsdf_context, material);
             let weight = mi_weight(emitter_context.emitter_pdf, bsdf_pdf);
 
-            if bounce == 1u {
+            if true {
                 // return to_local(emitter_context.world_incident_dir, local_frame);
                 // return vec3f(emitter_context.color);
                 // return vec3f(cos_theta(emitter_context.emittance_dir));
@@ -714,9 +736,14 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
                 * abs(cos_theta(bsdf_context.outgoing_dir))
                 * weight;
 
-            let shadow_ray_hit_info = trace_ray(Ray(hit_info.intersection, -emitter_context.world_emittance_dir));
-            if shadow_ray_hit_info.distance >= emitter_context.emitter_distance - 10.0 {
+            let shadow_ray_hit_info = trace_ray(make_ray(hit_info.intersection, -emitter_context.world_emittance_dir, emitter_context.emitter_distance - 0.02));
+            if !shadow_ray_hit_info.hit {
                 radiance += contribution;
+            }
+
+            if true {
+                // return radiance;
+                // return vec3f(- shadow_ray_hit_info.distance + emitter_context.emitter_distance);
             }
         }
 
@@ -733,7 +760,7 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
                 throughput /= probability_to_die;
             }
 
-            ray = Ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
+            ray = make_inf_ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
         }
     }
 

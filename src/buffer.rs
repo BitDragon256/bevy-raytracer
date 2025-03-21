@@ -39,7 +39,7 @@ impl Default for BufferCache {
     fn default() -> Self {
         Self {
             pushed: false,
-            iters: 100,
+            iters: 10,
         }
     }
 }
@@ -56,12 +56,12 @@ pub fn fill_buffers(
     mut buffer_cache: ResMut<BufferCache>,
     mut meshes: Query<(&mut NEMesh, &RaytracingMaterial, &GpuTransform)>,
 ) {
-    if buffer_cache.iters <= 0 {
+    if buffer_cache.iters < 0 {
         return;
     } else {
         // buffer_cache.pushed = true;
+        println!("iterations remaining: {}", buffer_cache.iters);
         buffer_cache.iters -= 1;
-        // println!("iterations remaining: {}", buffer_cache.iters);
     }
 
     let mut all_meshes = Vec::new();
@@ -100,6 +100,16 @@ pub fn fill_buffers(
         tri_faces.append(&mut mesh.faces);
         materials.push(material.clone());
         transforms.push(transform.clone());
+    }
+
+    if buffer_cache.iters == 0 {
+        println!("{} meshes", all_meshes.len());
+        println!("{} aabbs", gpu_bvh.len());
+        println!("{} vertices", vertices.len());
+        println!("{} tri faces", tri_faces.len());
+        println!("{} materials", materials.len());
+        println!("{} transforms", transforms.len());
+        println!("{} lights", lights.len());
     }
 
     let Ok(mut model_buffer) = model_buffer.lock() else { return; };

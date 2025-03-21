@@ -8,7 +8,8 @@
         "sample_count": 1,
         "sampler": "independent",
         "max_bounces": 1,
-        "min_bounces": 3
+        "min_bounces": 3,
+        "speed": 5
     },
     "meshes": [
         {
@@ -43,6 +44,7 @@
             }
         },
         {
+            "invisible": "",
             "object": "meshes/dragon_simplified.obj",
             "bsdf": {
                 "type": "diffuse",
@@ -54,6 +56,7 @@
             }
         },
         {
+            "invisible": "",
             "object": "meshes/teapot.triangulated.obj",
             "bsdf": {
                 "type": "diffuse",

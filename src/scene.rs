@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::BufReader;
 use bevy::prelude::*;
 use bevy::prelude::Projection::Perspective;
-use bevy_flycam::FlyCam;
+use bevy_flycam::{FlyCam, MovementSettings};
 use obj::{load_obj, Obj};
 use serde_json::{Number, Value};
 use crate::render::RaytracingCamera;
@@ -66,6 +66,7 @@ fn load_object(filename: &str) -> NEMesh {
 
 pub fn load_scene(
     mut commands: Commands,
+    mut movement_settings: ResMut<MovementSettings>,
     filename: &str,
 ) {
     let scene_folder = filename.chars().take(filename.rfind("/").unwrap_or(filename.len() - 1)).collect::<String>();
@@ -82,6 +83,9 @@ pub fn load_scene(
             let sampler = cond_string(camera.get("sampler"), "independent");
             let max_bounces = cond_u32(camera.get("max_bounces"), 10);
             let min_bounces = cond_u32(camera.get("min_bounces"), 3);
+            let speed = cond_f32(camera.get("speed"), 180f32);
+
+            movement_settings.speed = speed;
 
             commands.spawn((
                 Camera3d::default(),
