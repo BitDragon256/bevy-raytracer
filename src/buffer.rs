@@ -1,4 +1,4 @@
-use bevy::prelude::{Deref, Entity, EntityRef, GlobalTransform, Query, Res, ResMut, Resource, Transform, World};
+use bevy::prelude::{Deref, Entity, EntityRef, GlobalTransform, Query, Res, ResMut, Resource, Transform, Vec3, World};
 use bevy::render::render_resource::StorageBuffer;
 use crate::extract::{GpuBvhNode, GpuNEMesh, GpuTransform};
 use crate::types::{NEVertex, NEMesh, RaytracingMaterial, NETriFace, RaytracingLight};
@@ -87,7 +87,12 @@ pub fn fill_buffers(
             bvh_size: flattened_bvh.len() as u32,
             material_offset: materials.len() as u32,
             transform_index: transforms.len() as u32,
-            surface_area: mesh.faces.iter().map(|f| 1.0).sum()
+            surface_area: mesh.faces.iter().map(|f| {
+                let a = mesh.vertices[f.a as usize].pos;
+                let b = mesh.vertices[f.b as usize].pos;
+                let c = mesh.vertices[f.c as usize].pos;
+                return (b - a).cross(c - a).length() * 0.5;
+            }).sum()
         });
 
         gpu_bvh.append(&mut flattened_bvh);

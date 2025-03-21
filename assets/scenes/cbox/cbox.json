@@ -5,10 +5,10 @@
     "up": [0, 1, 0],
 
     "fov": 39.3077,
-    "sample_count": 4,
+    "sample_count": 1,
     "sampler": "independent",
-    "max_bounces": 5,
-    "min_bounces": 2
+    "max_bounces": 10,
+    "min_bounces": 3
   },
   "meshes": [
     {
