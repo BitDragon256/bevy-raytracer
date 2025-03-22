@@ -28,6 +28,7 @@ pub fn setup(
     movement_settings: ResMut<MovementSettings>,
 ) {
     load_scene(commands, movement_settings, "sponza/sponza.json");
+    // load_scene(commands, movement_settings, "cbox/cbox.json");
     // load_scene(commands, "dragon/dragon.json");
     println!(">> example scene set up");
 }

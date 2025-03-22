@@ -1,6 +1,7 @@
 use bevy::prelude::{Deref, Entity, EntityRef, GlobalTransform, Query, Res, ResMut, Resource, Transform, Vec3, World};
 use bevy::render::render_resource::StorageBuffer;
-use crate::extract::{GpuBvhNode, GpuNEMesh, GpuTransform};
+use bvh::bvh::BvhNode;
+use crate::extract::{to_gpu_bvh, GpuBvhNode, GpuNEMesh, GpuTransform};
 use crate::types::{NEVertex, NEMesh, RaytracingMaterial, NETriFace, RaytracingLight};
 
 #[derive(Resource, Deref, Default)]
@@ -73,7 +74,11 @@ pub fn fill_buffers(
     let mut lights = Vec::new();
 
     for (mut mesh, material, transform) in &mut meshes {
-        let mut flattened_bvh = mesh.bvh.flatten_custom(&GpuBvhNode::from_bvh);
+        let mut bvh = if !mesh.flattened_bvh {
+            to_gpu_bvh(&mesh.bvh.nodes)
+        } else {
+            mesh.bvh.flatten_custom(&GpuBvhNode::from_bvh)
+        };
 
         if material.radiance.length() > 0f32 {
             let mut mesh_lights = (0..mesh.faces.len()).map(|i| RaytracingLight::new(i as u32, all_meshes.len() as u32)).collect::<Vec<_>>();
@@ -84,7 +89,7 @@ pub fn fill_buffers(
             vertex_offset: vertices.len() as u32,
             face_offset: tri_faces.len() as u32,
             bvh_root: gpu_bvh.len() as u32,
-            bvh_size: flattened_bvh.len() as u32,
+            bvh_size: bvh.len() as u32,
             material_offset: materials.len() as u32,
             transform_index: transforms.len() as u32,
             surface_area: mesh.faces.iter().map(|f| {
@@ -92,10 +97,11 @@ pub fn fill_buffers(
                 let b = (transform.transform * mesh.vertices[f.b as usize].pos.extend(1f32)).truncate();
                 let c = (transform.transform * mesh.vertices[f.c as usize].pos.extend(1f32)).truncate();
                 return (b - a).cross(c - a).length() * 0.5;
-            }).sum()
+            }).sum(),
+            flattened_bvh: if mesh.flattened_bvh { 1 } else { 0 },
         });
 
-        gpu_bvh.append(&mut flattened_bvh);
+        gpu_bvh.append(&mut bvh);
         vertices.append(&mut mesh.vertices);
         tri_faces.append(&mut mesh.faces);
         materials.push(material.clone());

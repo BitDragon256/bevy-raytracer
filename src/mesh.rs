@@ -39,7 +39,7 @@ impl BHShape<f32, 3> for NETriangle<'_> {
 }
 
 impl NEMesh {
-    pub(crate) fn new(vertices: Vec<NEVertex>, faces: Vec<NETriFace>) -> Self {
+    pub fn new(vertices: Vec<NEVertex>, faces: Vec<NETriFace>) -> Self {
         let (bvh, bvh_faces) = {
             let mut bvh_faces: Vec<NETriangle> = faces.into_iter().map(|face| NETriangle {
                 face,
@@ -55,6 +55,7 @@ impl NEMesh {
             vertices,
             faces: bvh_faces,
             bvh,
+            flattened_bvh: true,
         }
     }
 }

@@ -35,6 +35,12 @@ fn cond_u32(v: Option<&Value>, default: u32) -> u32 {
         _ => default
     }
 }
+fn cond_bool(v: Option<&Value>, default: bool) -> bool {
+    match v {
+        Some(Value::Bool(b)) => *b,
+        _ => default
+    }
+}
 fn cond_string(v: Option<&Value>, default: &str) -> String {
     match v {
         Some(Value::String(s)) => s.clone(),
@@ -119,7 +125,9 @@ pub fn load_scene(
                         }
 
                         let Value::String(object) = mesh_json.get("object").expect("mesh should have attached obj file") else { panic!("object value should be string") };
-                        let model = load_object(format!("{}/{}", scene_folder, object).as_str());
+                        let mut model = load_object(format!("{}/{}", scene_folder, object).as_str());
+                        model.flattened_bvh = cond_bool(mesh_json.get("flattened bvh"), true);
+
                         let (translate, scale, rotate) = match mesh_json.get("transform") {
                             Some(Value::Object(transform)) => (
                                 cond_array_to_vec(transform.get("translate"), Vec3::ZERO),

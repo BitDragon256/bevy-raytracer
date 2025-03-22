@@ -74,6 +74,7 @@ pub struct NEMesh {
     pub vertices: Vec<NEVertex>,
     pub faces: Vec<NETriFace>,
     pub bvh: Bvh<f32, 3>,
+    pub flattened_bvh: bool,
 }
 
 // BSDF overview:

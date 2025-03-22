@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use bevy::render::extract_component::ExtractComponent;
 use bevy::render::render_resource::ShaderType;
 use bvh::aabb::Aabb;
+use bvh::bvh::BvhNode;
 use crate::render::{GpuRaytracingCamera, RaytracingCamera};
 
 #[derive(ShaderType)]
@@ -14,6 +15,7 @@ pub struct GpuNEMesh {
     pub material_offset: u32,
     pub transform_index: u32,
     pub surface_area: f32,
+    pub flattened_bvh: u32, // bool
 }
 
 #[derive(ShaderType, Component, Clone, Debug)]
@@ -42,7 +44,7 @@ impl ExtractComponent for GpuTransform {
     }
 }
 
-#[derive(ShaderType, Debug)]
+#[derive(ShaderType, Debug, Clone)]
 pub struct GpuBvhNode {
     pub min: Vec3,
     pub max: Vec3,
@@ -66,6 +68,35 @@ impl GpuBvhNode {
             shape_index,
         }
     }
+    pub fn empty() -> Self {
+        Self {
+            min: Vec3::ZERO,
+            max: Vec3::ZERO,
+            entry_index: u32::MAX,
+            exit_index: u32::MAX,
+            shape_index: u32::MAX,
+        }
+    }
+}
+
+pub fn to_gpu_bvh(bvh_nodes: &Vec<BvhNode<f32, 3>>) -> Vec<GpuBvhNode> {
+    let mut bvh = vec![GpuBvhNode::empty(); bvh_nodes.len()];
+    for i in 0..bvh_nodes.len() {
+        match bvh_nodes[i] {
+            BvhNode::Leaf { shape_index: shape, .. } => bvh[i].shape_index = shape as u32,
+            BvhNode::Node { parent_index: _, child_l_index, child_l_aabb, child_r_index, child_r_aabb } => {
+                bvh[child_l_index].min = Vec3::new(child_l_aabb.min.x, child_l_aabb.min.y, child_l_aabb.min.z);
+                bvh[child_l_index].max = Vec3::new(child_l_aabb.max.x, child_l_aabb.max.y, child_l_aabb.max.z);
+
+                bvh[child_r_index].min = Vec3::new(child_r_aabb.min.x, child_r_aabb.min.y, child_r_aabb.min.z);
+                bvh[child_r_index].max = Vec3::new(child_r_aabb.max.x, child_r_aabb.max.y, child_r_aabb.max.z);
+
+                bvh[i].entry_index = child_l_index as u32;
+                bvh[i].exit_index = child_r_index as u32;
+            }
+        }
+    }
+    bvh
 }
 
 impl ExtractComponent for GpuRaytracingCamera {

@@ -43,14 +43,14 @@ fn intersect_triangle(ray: Ray, a: vec3f, b: vec3f, c: vec3f) -> HitInfo {
 	return intersection;
 }
 
-fn intersect_aabb(ray_origin: vec3f, ray_inv_dir: vec3f, ray_max: f32, box_min: vec3f, box_max: vec3f) -> bool {
+fn intersect_aabb(ray_origin: vec3f, ray_inv_dir: vec3f, ray_max: f32, box_min: vec3f, box_max: vec3f) -> f32 {
     let t1 = (box_min - ray_origin) * ray_inv_dir;
     let t2 = (box_max - ray_origin) * ray_inv_dir;
 
     let tmin = max(max(min(t1.x, t2.x), min(t1.y, t2.y)), min(t1.z, t2.z));
     let tmax = min(min(max(t1.x, t2.x), max(t1.y, t2.y)), max(t1.z, t2.z));
 
-    return tmax >= tmin && tmax > 0 && tmin <= ray_max;
+    return select(INF, tmin, tmax >= tmin && tmax > 0 && tmin <= ray_max);
 }
 
 // #import "shaders/types.wgsl"::{
@@ -90,6 +90,7 @@ struct NEMesh {
     material_offset: u32,
     transform_index: u32,
     surface_area: f32,
+    flattened_bvh: u32,
 }
 struct NEVertex {
     position: vec3f,
@@ -141,6 +142,7 @@ struct HitInfo {
     face_index: u32,
     material_index: u32,
     mesh_index: u32,
+    test_count: f32,
 }
 
 struct Material {
@@ -215,7 +217,7 @@ fn uniform_triangle_to_triangle(v: vec2f, a: vec3f, b: vec3f, c: vec3f) -> vec3f
 @group(0) @binding(2) var<uniform> camera: RaytracingCamera;
 
 @group(1) @binding(0) var<storage, read> mesh_buffer: array<NEMesh>;
-@group(1) @binding(1) var<storage, read> llas_buffer: array<BvhNode>;
+@group(1) @binding(1) var<storage, read_write> llas_buffer: array<BvhNode>;
 @group(1) @binding(2) var<storage, read> vertex_buffer: array<NEVertex>;
 @group(1) @binding(3) var<storage, read> tri_face_buffer: array<NETriFace>;
 @group(1) @binding(4) var<storage, read> material_buffer: array<Material>;
@@ -226,7 +228,101 @@ fn apply_transform(transform: Transform, v: vec3f) -> vec3f {
     return (transform.matrix * vec4f(v, 1.0)).xyz;
 }
 
+fn intersect_mesh_stack(ray: Ray, mesh: NEMesh) -> HitInfo {
+    var test_count = 0.0;
+
+    var nearest_hit_info = HitInfo();
+    nearest_hit_info.distance = INF;
+
+    let bvh_offset = mesh.bvh_root;
+    let transform = transform_buffer[mesh.transform_index];
+
+    var mod_ray = ray;
+    let inv_ray_dir = 1.0 / ray.direction;
+
+    var stack = array<u32, 128>();
+    var stack_index = 1u;
+
+    stack[0] = 0u;
+
+    while stack_index > 0u && test_count < 500.0 {
+        stack_index--;
+        let bvh_index = stack[stack_index];
+
+        if bvh_index >= mesh.bvh_size {
+            break;
+        }
+
+        let bvh_node = llas_buffer[bvh_offset + bvh_index];
+
+        if bvh_node.shape_index != U32_MAX { // leaf node
+            let face = tri_face_buffer[bvh_node.shape_index + mesh.face_offset];
+
+            // NOTE vertex access
+            let a = apply_transform(transform, vertex_buffer[face.a + mesh.vertex_offset].position);
+            let b = apply_transform(transform, vertex_buffer[face.b + mesh.vertex_offset].position);
+            let c = apply_transform(transform, vertex_buffer[face.c + mesh.vertex_offset].position);
+            let tri_hit_info = intersect_triangle(mod_ray, a, b, c);
+
+            if tri_hit_info.hit && tri_hit_info.distance < nearest_hit_info.distance {
+                nearest_hit_info = tri_hit_info;
+                nearest_hit_info.face_index = bvh_node.shape_index + mesh.face_offset;
+                nearest_hit_info.material_index = face.material_index + mesh.material_offset;
+
+                mod_ray.max = tri_hit_info.distance;
+            }
+        } else {
+            test_count += 2.0;
+
+            let left_child = llas_buffer[bvh_offset + bvh_node.entry_index];
+            let right_child = llas_buffer[bvh_offset + bvh_node.exit_index];
+
+            let l = intersect_aabb(
+                mod_ray.origin + mod_ray.min * mod_ray.direction,
+                inv_ray_dir,
+                mod_ray.max - mod_ray.min,
+                apply_transform(transform, left_child.min),
+                apply_transform(transform, left_child.max)
+            );
+
+            let r = intersect_aabb(
+                mod_ray.origin + mod_ray.min * mod_ray.direction,
+                inv_ray_dir,
+                mod_ray.max - mod_ray.min,
+                apply_transform(transform, right_child.min),
+                apply_transform(transform, right_child.max)
+            );
+
+            if l < r { // left is nearer
+                if r != INF {
+                    stack[stack_index] = bvh_node.exit_index;
+                    stack_index++;
+                }
+                stack[stack_index] = bvh_node.entry_index;
+                stack_index++;
+            } else { // right is nearer
+                if l != INF {
+                    stack[stack_index] = bvh_node.entry_index;
+                    stack_index++;
+                }
+                if r != INF {
+                    stack[stack_index] = bvh_node.exit_index;
+                    stack_index++;
+                }
+            }
+        }
+    }
+
+    nearest_hit_info.test_count = test_count;
+    return nearest_hit_info;
+}
 fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
+    if mesh.flattened_bvh == 0 {
+        return intersect_mesh_stack(ray, mesh);
+    }
+
+    var test_count = 0.0;
+
     var nearest_hit_info = HitInfo();
     nearest_hit_info.distance = INF;
 
@@ -239,10 +335,14 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
     let bvh_offset = mesh.bvh_root;
     var bvh_index = 0u;
 
-    while bvh_index < mesh.bvh_size {
+    while bvh_index < mesh.bvh_size && test_count < 1000.0 {
+        test_count += 1.0;
+
         let bvh_node = llas_buffer[bvh_index + bvh_offset];
 
         if bvh_node.entry_index == U32_MAX { // leaf node
+            test_count -= 1.0;
+
             let face = tri_face_buffer[bvh_node.shape_index + mesh.face_offset];
 
             // NOTE vertex access
@@ -261,26 +361,23 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
 
             bvh_index = bvh_node.exit_index;
         }
-        else if intersect_aabb(mod_ray.origin + mod_ray.min * mod_ray.direction, inv_ray_dir, mod_ray.max - mod_ray.min, apply_transform(transform, bvh_node.min), apply_transform(transform, bvh_node.max)) {
-            bvh_index = bvh_node.entry_index;
-        } else {
-            bvh_index = bvh_node.exit_index;
+        else {
+            let a = intersect_aabb(
+                mod_ray.origin + mod_ray.min * mod_ray.direction,
+                inv_ray_dir,
+                mod_ray.max - mod_ray.min,
+                apply_transform(transform, bvh_node.min),
+                apply_transform(transform, bvh_node.max)
+            );
+            if a < INF {
+                bvh_index = bvh_node.entry_index;
+            } else {
+                bvh_index = bvh_node.exit_index;
+            }
         }
     }
 
-    // for (var face_index = mesh.face_start; face_index < mesh.face_start + mesh.face_count; face_index++) {
-    //     let face = tri_face_buffer[face_index];
-    //     let a = vertex_buffer[face.a + mesh.vertex_offset].position;
-    //     let b = vertex_buffer[face.b + mesh.vertex_offset].position;
-    //     let c = vertex_buffer[face.c + mesh.vertex_offset].position;
-    //     let tri_hit_info = intersect_triangle(ray, a, b, c);
-
-    //     if tri_hit_info.hit && tri_hit_info.distance < nearest_hit_info.distance {
-    //         nearest_hit_info = tri_hit_info;
-    //         nearest_hit_info.face_index = face_index;
-    //         nearest_hit_info.material_index = face.material_index + mesh.material_offset;
-    //     }
-    // }
+    nearest_hit_info.test_count = test_count;
 
     return nearest_hit_info;
 }
@@ -463,9 +560,14 @@ fn trace_ray(ray: Ray) -> HitInfo {
     var mod_ray = ray;
     mod_ray.min = 0.01;
 
+    var test_count = 0.0;
+
     for (var mesh_index: u32 = 0; mesh_index < arrayLength(&mesh_buffer); mesh_index++) {
         let mesh = mesh_buffer[mesh_index];
         let mesh_hit_info = intersect_mesh(mod_ray, mesh);
+
+        test_count += mesh_hit_info.test_count;
+
         if mesh_hit_info.hit && mesh_hit_info.distance < nearest_hit_info.distance {
             nearest_hit_info = mesh_hit_info;
             nearest_hit_info.mesh_index = mesh_index;
@@ -473,6 +575,7 @@ fn trace_ray(ray: Ray) -> HitInfo {
             mod_ray.max = mesh_hit_info.distance;
         }
     }
+    nearest_hit_info.test_count = test_count;
     return nearest_hit_info;
 }
 
@@ -687,6 +790,25 @@ fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>, metropolis_st
     return radiance;
 }
 
+fn gradient(t: f32) -> vec3f {
+    let stop0 = 0.0;
+    let stop1 = 0.33;
+    let stop2 = 0.66;
+    let stop3 = 1.0;
+
+    let color0 = vec3f(1.0, 0.0, 0.0);
+    let color1 = vec3f(1.0, 1.0, 0.0);
+    let color2 = vec3f(0.0, 1.0, 0.0);
+    let color3 = vec3f(0.0, 0.0, 1.0);
+
+    var color: vec3f;
+    color = mix(color0, color1, clamp((t - stop0) / (stop1 - stop0), 0.0, 1.0));
+    color = mix(color, color2, clamp((t - stop1) / (stop2 - stop1), 0.0, 1.0));
+    color = mix(color, color3, clamp((t - stop2) / (stop3 - stop2), 0.0, 1.0));
+
+    return color;
+}
+
 fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
     var throughput = vec3f(1.0);
     var radiance = vec3f(0.0);
@@ -696,8 +818,12 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
 
     for (var bounce = 0u; bounce < camera.max_bounces; bounce++) {
         let hit_info = trace_ray(ray);
+        let grad = gradient(hit_info.test_count / 100.0);
         if !hit_info.hit {
+            // return grad;
             break;
+        } else {
+            // return grad + vec3f(0.0, 0.4, 0.4);
         }
 
         let local_frame = create_frame(hit_info.normal);
@@ -730,7 +856,7 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
 
                 // return vec3f(emitter_context.emittance_dir.z); // / 10000000000.0 
                 // return vec3f(emitter_context.emitter_pdf / 1000.0);
-                return emitter_context.color;
+                // return emitter_context.color;
             }
 
             let contribution = 

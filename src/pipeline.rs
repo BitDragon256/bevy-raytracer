@@ -48,7 +48,7 @@ impl FromWorld for RaytracingPipeline {
                     },
                     // llas buffer
                     BindingType::Buffer {
-                        ty: BufferBindingType::Storage { read_only: true },
+                        ty: BufferBindingType::Storage { read_only: false },
                         has_dynamic_offset: false,
                         min_binding_size: None,
                     },

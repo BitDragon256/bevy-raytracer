@@ -12,6 +12,7 @@
   },
   "meshes": [
     {
+      "flattened bvh": true,
       "object": "meshes/cbox_emitter.obj",
       "bsdf": {
         "type": "diffuse",
