@@ -403,9 +403,9 @@ fn phong_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> B
 }
 
 fn diffuse_eval(context: BSDFContext, material: Material) -> vec3f {
-    if cos_theta(context.incident_dir) <= 0 || cos_theta(context.outgoing_dir) <= 0 {
-        return vec3f(0.0);
-    }
+    // if cos_theta(context.incident_dir) <= 0 || cos_theta(context.outgoing_dir) <= 0 {
+    //     return vec3f(0.0);
+    // }
     return material.albedo * INV_PI;
 }
 fn diffuse_pdf(context: BSDFContext, material: Material) -> f32 {
@@ -582,13 +582,13 @@ fn is_emitter(material: Material) -> bool {
     return dot(material.radiance, material.radiance) != 0.0;
 }
 fn eval_emitter_direct(emittance_dir: vec3f, material: Material) -> vec3f {
-    if cos_theta(emittance_dir) > 0.0 {
+    if abs(cos_theta(emittance_dir)) > 0.0 {
         return material.radiance;
     }
     return vec3f(0.0);
 }
 fn emitter_pdf_direct(square_distance: f32, emittance_dir: vec3f, mesh: NEMesh) -> f32 {
-    return min(square_distance / max(EPSILON, mesh.surface_area * cos_theta(emittance_dir)), INF);
+    return min(square_distance / max(EPSILON, mesh.surface_area * abs(cos_theta(emittance_dir))), INF);
 }
 fn sample_emitter_direct(origin: vec3f, light: Light, rng_sample: vec2f) -> EmitterContext {
     let mesh = mesh_buffer[light.mesh_index];
@@ -628,7 +628,7 @@ fn sample_random_emitter_direct(origin: vec3f, rng_sample: vec2f) -> EmitterCont
 
     var emitter_context = sample_emitter_direct(origin, light, rng_sample);
 
-    emitter_context.color *= f32(arrayLength(&light_buffer));
+    // emitter_context.color *= f32(arrayLength(&light_buffer));
     return emitter_context;
 }
 fn mi_weight(a: f32, b: f32) -> f32 {
@@ -727,6 +727,10 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
                 // return to_local(emitter_context.world_incident_dir, local_frame);
                 // return vec3f(emitter_context.color);
                 // return vec3f(cos_theta(emitter_context.emittance_dir));
+
+                // return vec3f(emitter_context.emittance_dir.z); // / 10000000000.0 
+                // return vec3f(emitter_context.emitter_pdf / 1000.0);
+                return emitter_context.color;
             }
 
             let contribution = 

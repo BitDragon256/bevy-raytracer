@@ -88,9 +88,9 @@ pub fn fill_buffers(
             material_offset: materials.len() as u32,
             transform_index: transforms.len() as u32,
             surface_area: mesh.faces.iter().map(|f| {
-                let a = mesh.vertices[f.a as usize].pos;
-                let b = mesh.vertices[f.b as usize].pos;
-                let c = mesh.vertices[f.c as usize].pos;
+                let a = (transform.transform * mesh.vertices[f.a as usize].pos.extend(1f32)).truncate();
+                let b = (transform.transform * mesh.vertices[f.b as usize].pos.extend(1f32)).truncate();
+                let c = (transform.transform * mesh.vertices[f.c as usize].pos.extend(1f32)).truncate();
                 return (b - a).cross(c - a).length() * 0.5;
             }).sum()
         });
