@@ -1,0 +1,117 @@
+{
+    "camera": {
+        "origin": [-8, 6, -5],
+        "target": [0, 0.6, 2.5],
+        "up": [0, 1, 0],
+
+        "speed": 5,
+
+        "fov": 36,
+        "sampler": "independent",
+        "sample_count": 1,
+        "max_bounces": 5,
+        "min_bounces": 2
+    },
+    "meshes": [
+        {
+            "object": "meshes/bar_au.obj",
+            "transform": {
+                "scale": [-1, 1, -1],
+                "translate": [0, 0, 0]
+            },
+            "bsdf": {
+                "type": "conductor",
+                "eta": [0.143085, 0.374852, 1.44208],
+                "k": [3.98205, 2.38506, 1.60276]
+            }
+        },
+        {
+            "object": "meshes/bar_au.obj",
+            "transform": {
+                "scale": [-1, 1, -1],
+                "translate": [0, 0, 2]
+            },
+            "bsdf": {
+                "type": "conductor",
+                "eta": [0.143085, 0.374852, 1.44208],
+                "k": [3.98205, 2.38506, 1.60276]
+            }
+        },
+        {
+            "object": "meshes/bar_au.obj",
+            "transform": {
+                "scale": [-1, 1, -1],
+                "translate": [0, 0, 4]
+            },
+            "bsdf": {
+                "type": "conductor",
+                "eta": [0.143085, 0.374852, 1.44208],
+                "k": [3.98205, 2.38506, 1.60276]
+            }
+        },
+        {
+            "object": "meshes/bar_ag.obj",
+            "transform": {
+                "scale": [-1, 1, -1],
+                "translate": [0, 1, 1]
+            },
+            "bsdf": {
+                "type": "conductor",
+                "eta": [0.15522, 0.116692, 0.138342],
+                "k": [4.827, 3.12139, 2.14636]
+            }
+        },
+        {
+            "object": "meshes/bar_ag.obj",
+            "transform": {
+                "scale": [-1, 1, -1],
+                "translate": [0, 1, 3]
+            },
+            "bsdf": {
+                "type": "conductor",
+                "eta": [0.15522, 0.116692, 0.138342],
+                "k": [4.827, 3.12139, 2.14636]
+            }
+        },
+        {
+            "object": "meshes/bar_cu.obj",
+            "transform": {
+                "scale": [-1, 1, -1],
+                "translate": [0, 2, 2]
+            },
+            "bsdf": {
+                "type": "conductor",
+                "eta": [0.20038, 0.923777, 1.10191],
+                "k": [3.91185, 2.45217, 2.14159]
+            }
+        },
+        {
+            "object": "meshes/bar.obj",
+            "bsdf": {
+                "type": "dielectric",
+                "extIOR": 1.0,
+                "intIOR": 1.5
+            },
+            "transform": {
+                "scale": [-1, 1, -1],
+                "_rotate": [0, 0, 60],
+                "translate": [-2.6, 1.1, 2.4]
+            }
+        },
+        {
+            "object": "meshes/box.obj",
+            "bsdf": {
+                "type": "diffuse",
+                "albedo": [0.3, 0.3, 0.3]
+            }
+        },
+        {
+            "object": "meshes/emitter.obj",
+            "bsdf": {
+                "type": "diffuse",
+                "albedo": [0.6, 0.6, 0.6],
+                "radiance": [10, 10, 10]
+            }
+        }
+    ]
+}

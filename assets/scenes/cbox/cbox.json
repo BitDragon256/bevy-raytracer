@@ -7,8 +7,8 @@
     "fov": 39.3077,
     "sample_count": 1,
     "sampler": "independent",
-    "max_bounces": 10,
-    "min_bounces": 3
+    "max_bounces": 5,
+    "min_bounces": 2
   },
   "meshes": [
     {
@@ -96,8 +96,8 @@
         "extIOR": 1.0
       },
       "transform": {
-        "translate": [0, 0, 100],
-        "scale": [200, 200, 200],
+        "translate": [200, 0, 250],
+        "scale": [400, 400, 400],
         "rotate": [0, 0, 0]
       }
     }

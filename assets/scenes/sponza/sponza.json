@@ -7,7 +7,7 @@
         "fov": 40,
         "sample_count": 1,
         "sampler": "independent",
-        "max_bounces": 5,
+        "max_bounces": 4,
         "min_bounces": 2,
         "speed": 1.5
     },
@@ -69,7 +69,7 @@
             }
         },
         {
-            "object": "meshes/sphere.triangulated.obj",
+            "object": "meshes/sphere2.obj",
             "bsdf": {
                 "type": "dielectric",
                 "albedo": [0, 0.4, 0.4],
@@ -77,7 +77,7 @@
                 "intIOR": 1.5
             },
             "transform": {
-                "scale": [0.001, 0.001, 0.001],
+                "_scale": [0.001, 0.001, 0.001],
                 "rotate": [0, 0, 0],
                 "translate": [5, 2, -2]
             }

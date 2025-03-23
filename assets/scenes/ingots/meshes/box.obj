@@ -1,3 +1,20 @@
+# Triangulated OBJ File
+# File Triangulated by FalconCoding (https://github.com/StefanJohnsen)
+
+# Original File      : box.obj
+#          Vertices  : 8
+#          Polygons  : 6
+#          Triangles : 0
+
+# Triangles created to replace polygons   : 12
+# Total triangles of existing and created : 12
+                                                                                                  
+# Please note that any comments regarding the number of triangles and faces below,
+# originating from the original file, will be incorrect for this triangulated file.
+# Please update or remove old metrics information.
+#____________________________________________________________________________________________________
+#
+
 # Blender v2.90.0 OBJ File: 'ingots.blend'
 # www.blender.org
 o box_Cube.011
@@ -30,9 +47,15 @@ vn 0.0000 0.0000 -1.0000
 vn 0.0000 1.0000 0.0000
 vn 0.0000 -1.0000 0.0000
 s off
-f 1/1/1 3/2/1 4/3/1 2/4/1
-f 3/2/2 7/5/2 8/6/2 4/3/2
-f 7/5/3 5/7/3 6/8/3 8/6/3
-f 5/7/4 1/9/4 2/10/4 6/8/4
-f 3/11/5 1/12/5 5/7/5 7/5/5
-f 8/6/6 6/8/6 2/13/6 4/14/6
+f 1/1/1 3/2/1 4/3/1
+f 1/1/1 4/3/1 2/4/1
+f 3/2/2 7/5/2 8/6/2
+f 3/2/2 8/6/2 4/3/2
+f 7/5/3 5/7/3 6/8/3
+f 7/5/3 6/8/3 8/6/3
+f 5/7/4 1/9/4 2/10/4
+f 5/7/4 2/10/4 6/8/4
+f 3/11/5 1/12/5 5/7/5
+f 3/11/5 5/7/5 7/5/5
+f 8/6/6 6/8/6 2/13/6
+f 8/6/6 2/13/6 4/14/6
