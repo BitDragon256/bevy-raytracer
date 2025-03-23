@@ -5,19 +5,18 @@
     "up": [0, 1, 0],
 
     "fov": 39.3077,
-    "sample_count": 4,
+    "sample_count": 1,
     "sampler": "independent",
-    "max_bounces": 3,
+    "max_bounces": 10,
     "min_bounces": 3
   },
   "meshes": [
     {
-      "flattened bvh": true,
       "object": "meshes/cbox_emitter.obj",
       "bsdf": {
         "type": "diffuse",
         "albedo": [0.78, 0.78, 0.78],
-        "radiance": [15, 15, 15]
+        "radiance": [1, 1, 1]
       },
       "transform": {
         "translate": [0, -1, 0],
@@ -74,6 +73,7 @@
       }
     },
     {
+      "invisible": "",
       "object": "meshes/cbox_smallbox.obj",
       "bsdf": {
         "type": "diffuse",
@@ -81,10 +81,24 @@
       }
     },
     {
+      "invisible": "",
       "object": "meshes/cbox_largebox.obj",
       "bsdf": {
         "type": "diffuse",
         "albedo": [0.75, 0.75, 0.75]
+      }
+    },
+    {
+      "object": "meshes/sphere2.obj",
+      "bsdf": {
+        "type": "dielectric",
+        "intIOR": 1.5,
+        "extIOR": 1.0
+      },
+      "transform": {
+        "translate": [0, 0, 100],
+        "scale": [200, 200, 200],
+        "rotate": [0, 0, 0]
       }
     }
   ]

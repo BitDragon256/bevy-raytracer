@@ -151,6 +151,10 @@ struct Material {
     albedo: vec3f,
     specular: vec3f,
     exponent: f32,
+    extIOR: f32, // IOR == index of refraction
+    intIOR: f32,
+    eta: vec3f,
+    k: vec3f,
 }
 
 struct BSDFContext {
@@ -527,11 +531,99 @@ fn diffuse_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) ->
     return context;
 }
 
+fn conductor_eval(context: BSDFContext, material: Material) -> vec3f {
+    // if cos_theta(context.incident_dir) <= 0 || cos_theta(context.outgoing_dir) <= 0 {
+    //     return vec3f(0.0);
+    // }
+    return material.albedo * INV_PI;
+}
+fn conductor_pdf(context: BSDFContext, material: Material) -> f32 {
+    if cos_theta(context.incident_dir) <= 0 || cos_theta(context.outgoing_dir) <= 0 {
+        return 0.0;
+    }
+    return INV_PI * cos_theta(context.outgoing_dir);
+}
+fn conductor_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> BSDFContext {
+    var context = BSDFContext();
+    context.incident_dir = incident_dir;
+
+    if cos_theta(incident_dir) <= 0.0 {
+        context.color = vec3f(0.0);
+        return context;
+    }
+
+    context.outgoing_dir = square_to_cosine_hemisphere(rng_sample);
+    context.color = material.albedo;
+    context.relative_refractive_index = 1.0;
+
+    return context;
+}
+
+fn fresnel_dielectric(cos_theta_I: f32, extIOR: f32, intIOR: f32) -> f32 {
+    if extIOR == intIOR { return 0.0; }
+
+    let etaI = select(intIOR, extIOR, cos_theta_I >= 0.0);
+    let etaT = select(extIOR, intIOR, cos_theta_I >= 0.0);
+    let abs_cos_theta_I = abs(cos_theta_I);
+
+    let eta = etaI / etaT;
+    let sin_theta_t_sqr = eta * eta * (1.0 - abs_cos_theta_I * abs_cos_theta_I);
+
+    if sin_theta_t_sqr > 1.0 { return 1.0; }
+
+    let cos_theta_T = sqrt(1.0 - sin_theta_t_sqr);
+
+    let Rs = (etaI * cos_theta_I - etaT * cos_theta_T)
+           / (etaI * cos_theta_I + etaT * cos_theta_T);
+    let Rp = (etaT * cos_theta_I - etaI * cos_theta_T)
+           / (etaT * cos_theta_I + etaI * cos_theta_T);
+
+    return (Rs * Rs + Rp * Rp) / 2.0;
+}
+
+fn dielectric_eval(context: BSDFContext, material: Material) -> vec3f {
+    return vec3f(0.0);
+}
+fn dielectric_pdf(context: BSDFContext, material: Material) -> f32 {
+    return 0.0;
+}
+fn dielectric_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> BSDFContext {
+    let entering = cos_theta(incident_dir) > 0.0;
+
+    let etaI = select(material.intIOR, material.extIOR, entering);
+    let etaT = select(material.extIOR, material.intIOR, entering);
+    let eta = etaI / etaT;
+
+    let normal = select(vec3f(0.0, 0.0, -1.0), vec3f(0.0, 0.0, 1.0), entering);
+    let cos_theta_I = dot(incident_dir, normal);
+
+    let fresnel = fresnel_dielectric(cos_theta_I, etaI, etaT);
+
+    var context = BSDFContext();
+    context.incident_dir = incident_dir;
+
+    if rng_sample.y < fresnel { // reflect
+        context.outgoing_dir = reflect(incident_dir);
+        context.color = vec3f(1.0);
+    } else { // refract
+        context.outgoing_dir = refract(incident_dir, normal, etaI / etaT);
+        context.relative_refractive_index = eta;
+        context.color = vec3f(fresnel + (eta * eta * (1.0 - fresnel)));
+    }
+
+    return context;
+}
+
+
 fn eval_bsdf_pdf(context: BSDFContext, material: Material) -> f32 {
     if material.bsdf == 0 {
         return diffuse_pdf(context, material);
     } else if material.bsdf == 1 {
         return phong_pdf(context, material);
+    } else if material.bsdf == 2 {
+        return dielectric_pdf(context, material);
+    } else if material.bsdf == 3 {
+        return conductor_pdf(context, material);
     }
     return 0.0;
 }
@@ -540,6 +632,10 @@ fn eval_bsdf(context: BSDFContext, material: Material) -> vec3f {
         return diffuse_eval(context, material);
     } else if material.bsdf == 1 {
         return phong_eval(context, material);
+    } else if material.bsdf == 2 {
+        return dielectric_eval(context, material);
+    } else if material.bsdf == 3 {
+        return conductor_eval(context, material);
     }
     return vec3f(0.0);
 }
@@ -548,6 +644,10 @@ fn sample_bsdf(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> BS
         return diffuse_sample(incident_dir, rng_sample, material);
     } else if material.bsdf == 1 {
         return phong_sample(incident_dir, rng_sample, material);
+    } else if material.bsdf == 2 {
+        return dielectric_sample(incident_dir, rng_sample, material);
+    } else if material.bsdf == 3 {
+        return conductor_sample(incident_dir, rng_sample, material);
     }
     return BSDFContext();
 }
@@ -818,12 +918,13 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
 
     for (var bounce = 0u; bounce < camera.max_bounces; bounce++) {
         let hit_info = trace_ray(ray);
-        let grad = gradient(hit_info.test_count / 100.0);
+        let grad = gradient(hit_info.test_count / 500.0);
         if !hit_info.hit {
             // return grad;
-            break;
+            // break;
         } else {
-            // return grad + vec3f(0.0, 0.4, 0.4);
+            // return grad * 0.8 + vec3f(0.0, 0.4, 0.4);
+            // return gradient(hit_info.distance / 30.0);
         }
 
         let local_frame = create_frame(hit_info.normal);

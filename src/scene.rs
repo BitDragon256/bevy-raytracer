@@ -143,6 +143,10 @@ pub fn load_scene(
                         let specular = cond_array_to_vec(bsdf.get("specular"), Vec3::ONE);
                         let radiance = cond_array_to_vec(bsdf.get("radiance"), Vec3::ZERO);
                         let exponent = cond_f32(bsdf.get("exponent"), 0.0f32);
+                        let ext_ior = cond_f32(bsdf.get("extIOR"), 1f32);
+                        let int_ior = cond_f32(bsdf.get("intIOR"), 1f32);
+                        let eta = cond_array_to_vec(bsdf.get("eta"), Vec3::ONE);
+                        let k = cond_array_to_vec(bsdf.get("k"), Vec3::ONE);
 
                         commands.spawn((
                             Transform::from_translation(translate).with_scale(scale).with_rotation(Quat::from_euler(EulerRot::XYX, rotate.x.to_radians(), rotate.y.to_radians(), rotate.z.to_radians())),
@@ -150,6 +154,8 @@ pub fn load_scene(
                             RaytracingMaterial {
                                 bsdf: string_to_bsdf(&bsdf_type),
                                 albedo, specular, exponent, radiance,
+                                ext_ior, int_ior,
+                                eta, k,
                             }
                         ));
                     }
