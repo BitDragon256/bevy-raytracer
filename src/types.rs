@@ -89,6 +89,12 @@ pub struct RaytracingMaterial {
     pub albedo: Vec3,
     pub specular: Vec3,
     pub exponent: f32,
+    // dielectric
+    pub ext_ior: f32,
+    pub int_ior: f32,
+    // conductor
+    pub eta: Vec3,
+    pub k: Vec3,
 }
 
 #[derive(ShaderType)]
@@ -107,9 +113,11 @@ impl RaytracingLight {
 }
 
 pub fn string_to_bsdf(name: &str) -> u32 {
-    match name {
+    match name.strip_suffix("\"").unwrap().strip_prefix("\"").unwrap() {
         "diffuse" => 0,
         "phong" => 1,
+        "dielectric" => 2,
+        "conductor" => 3,
         _ => 0
     }
 }
