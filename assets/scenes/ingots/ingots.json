@@ -8,9 +8,9 @@
 
         "fov": 36,
         "sampler": "independent",
-        "sample_count": 16,
-        "max_bounces": 10,
-        "min_bounces": 2
+        "sample_count": 8,
+        "max_bounces": 4,
+        "min_bounces": 3
     },
     "meshes": [
         {
@@ -109,7 +109,10 @@
             "bsdf": {
                 "type": "diffuse",
                 "albedo": [0.6, 0.6, 0.6],
-                "radiance": [5, 5, 5]
+                "radiance": [50, 50, 50]
+            },
+            "transform": {
+                "_scale": [10, 1, 10]
             }
         }
     ]

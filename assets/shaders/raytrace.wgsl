@@ -215,6 +215,7 @@ const INF: f32 = 3.40282347e+38;
 const U32_MAX: u32 = 4294967295u;
 const RAD2DEG: f32 = 180.0 * INV_PI;
 const DEG2RAD: f32 = PI / 180.0;
+const EQUAL_MARGIN: f32 = 0.001;
 
 // #import "shaders/warp.wgsl"::{square_to_cosine_hemisphere_pdf, square_to_cosine_hemisphere, square_to_uniform_disk}
 // WARP.wgsl
@@ -496,8 +497,14 @@ fn cos_theta(v: vec3f) -> f32 {
 fn square_length(v: vec2f) -> f32 {
     return v.x * v.x + v.y * v.y;
 }
+fn square_length_(v: vec3f) -> f32 {
+    return dot(v, v);
+}
 fn mean(v: vec3f) -> f32 {
     return (v.x + v.y + v.z) / 3.0;
+}
+fn near_equal(a: vec3f, b: vec3f) -> bool {
+    return square_length_(a - b) < EQUAL_MARGIN;
 }
 
 struct Frame {
@@ -715,7 +722,7 @@ fn dielectric_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material)
         context.outgoing_dir = reflect(incident_dir);
         context.color = vec3f(1.0);
     } else { // refract
-        context.outgoing_dir = refract(incident_dir, normal, etaI / etaT);
+        context.outgoing_dir = refract(-incident_dir, normal, etaI / etaT);
         context.relative_refractive_index = eta;
         context.color = vec3f(fresnel + (eta * eta * (1.0 - fresnel)));
     }
@@ -915,7 +922,8 @@ fn sample_random_emitter_direct(origin: vec3f, rng_sample: vec2f) -> EmitterCont
     return emitter_context;
 }
 fn mi_weight(a: f32, b: f32) -> f32 {
-    return (a + b) / 2.0;
+    // return (a + b) / 2.0;
+    return a / (a + b);
 }
 
 fn is_nan(v: vec3f) -> bool {
@@ -995,6 +1003,8 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
     var ray = in_ray;
 
     var weight: f32;
+    var last_bsdf_context: BSDFContext;
+    var material: Material;
 
     for (var bounce = 0u; bounce < camera.max_bounces; bounce++) {
         let hit_info = trace_ray(ray);
@@ -1014,11 +1024,18 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
             // return vec3f(cos_theta(incident_dir));
         }
 
-        let material = material_buffer[hit_info.material_index];
-
         if is_emitter(material) {
-            radiance += throughput * eval_emitter_direct(incident_dir, material);
+            if bounce == 0u {
+                radiance += eval_emitter_direct(incident_dir, material);
+            } else {
+                let bsdf_pdf = eval_bsdf_pdf(last_bsdf_context, material);
+                let emitter_pdf = emitter_pdf_direct(hit_info.distance * hit_info.distance, incident_dir, mesh_buffer[hit_info.mesh_index]);
+
+                radiance += throughput * eval_emitter_direct(incident_dir, material) * mi_weight(bsdf_pdf, emitter_pdf);
+            }
         }
+
+        material = material_buffer[hit_info.material_index];
 
         // direct illumination
         {
@@ -1076,6 +1093,7 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
             }
 
             ray = make_inf_ray(hit_info.intersection, to_world(bsdf_context.outgoing_dir, local_frame));
+            last_bsdf_context = bsdf_context;
         }
     }
 
