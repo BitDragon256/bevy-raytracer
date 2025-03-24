@@ -81,14 +81,19 @@
       }
     },
     {
-      "invisible": "",
       "object": "meshes/cbox_largebox.obj",
       "bsdf": {
         "type": "diffuse",
         "albedo": [0.75, 0.75, 0.75]
+      },
+      "transform": {
+        "rotate": [0, 10, 0],
+        "translate": [-200, 0, 0],
+        "scale": [1, 1, 1]
       }
     },
     {
+      "invisible": "",
       "object": "meshes/sphere2.obj",
       "bsdf": {
         "type": "dielectric",

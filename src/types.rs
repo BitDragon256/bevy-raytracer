@@ -33,14 +33,21 @@ pub struct SocketRef {
 #[derive(ShaderType, Clone, Debug)]
 pub struct NEVertex {
     pub pos: Vec3,
+    pub normal: Vec3,
+    pub texture: Vec3,
     pub cell: CellRef,
 }
 
 impl NEVertex {
-    pub fn new(x: f32, y: f32, z: f32, cell: CellRef) -> Self {
+    pub fn with_pos(pos: Vec3, cell: CellRef) -> Self {
+        Self::with_normal(pos, Vec3::ZERO, cell)
+    }
+    pub fn with_normal(pos: Vec3, normal: Vec3, cell: CellRef) -> Self {
+        Self::new(pos, normal, Vec3::ZERO, cell)
+    }
+    pub fn new(pos: Vec3, normal: Vec3, texture: Vec3, cell: CellRef) -> Self {
         NEVertex {
-            pos: Vec3::new(x, y, z),
-            cell,
+            pos, normal, texture, cell
         }
     }
 }

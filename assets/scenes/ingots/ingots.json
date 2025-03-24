@@ -4,20 +4,19 @@
         "target": [0, 0.6, 2.5],
         "up": [0, 1, 0],
 
-        "speed": 5,
+        "speed": 2,
 
         "fov": 36,
         "sampler": "independent",
-        "sample_count": 1,
-        "max_bounces": 5,
+        "sample_count": 16,
+        "max_bounces": 10,
         "min_bounces": 2
     },
     "meshes": [
         {
             "object": "meshes/bar_au.obj",
             "transform": {
-                "scale": [-1, 1, -1],
-                "translate": [0, 0, 0]
+                "rotate": [0, 180, 0]
             },
             "bsdf": {
                 "type": "conductor",
@@ -28,8 +27,8 @@
         {
             "object": "meshes/bar_au.obj",
             "transform": {
-                "scale": [-1, 1, -1],
-                "translate": [0, 0, 2]
+                "translate": [0, 0, 2],
+                "rotate": [0, 180, 0]
             },
             "bsdf": {
                 "type": "conductor",
@@ -40,8 +39,8 @@
         {
             "object": "meshes/bar_au.obj",
             "transform": {
-                "scale": [-1, 1, -1],
-                "translate": [0, 0, 4]
+                "translate": [0, 0, 4],
+                "rotate": [0, 180, 0]
             },
             "bsdf": {
                 "type": "conductor",
@@ -94,7 +93,7 @@
             },
             "transform": {
                 "scale": [-1, 1, -1],
-                "_rotate": [0, 0, 60],
+                "rotate": [0, 0, 60],
                 "translate": [-2.6, 1.1, 2.4]
             }
         },
@@ -110,7 +109,7 @@
             "bsdf": {
                 "type": "diffuse",
                 "albedo": [0.6, 0.6, 0.6],
-                "radiance": [10, 10, 10]
+                "radiance": [5, 5, 5]
             }
         }
     ]

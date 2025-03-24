@@ -3,7 +3,7 @@ use std::io::BufReader;
 use bevy::prelude::*;
 use bevy::prelude::Projection::Perspective;
 use bevy_flycam::{FlyCam, MovementSettings};
-use obj::{load_obj, Obj};
+use obj::{load_obj, Obj, ObjResult};
 use serde_json::{Number, Value};
 use crate::render::RaytracingCamera;
 use crate::types::{string_to_bsdf, CellRef, NEMesh, NETriFace, NEVertex, RaytracingMaterial};
@@ -48,26 +48,50 @@ fn cond_string(v: Option<&Value>, default: &str) -> String {
     }
 }
 
-fn load_object(filename: &str) -> NEMesh {
-    let object_reader = BufReader::new(File::open(format!("assets/scenes/{}", filename)).unwrap_or_else(|_| panic!("object file {} does not exist", filename)));
-    let model: Obj<obj::Position> = load_obj(object_reader).unwrap_or_else(|e| panic!("object in file {} has wrong format: {}", filename, e));
+fn new_object_reader(filename: &str) -> BufReader<File> {
+    BufReader::new(File::open(format!("assets/scenes/{}", filename)).unwrap_or_else(|_| panic!("object file {} does not exist", filename)))
+}
 
-    NEMesh::new(
-        model.vertices.iter().map(|vertex| {
-            NEVertex {
-                pos: Vec3::from_array(vertex.position),
-                cell: CellRef::new(0),
-            }
-        }).collect(),
-        model.indices.chunks_exact(3).map(|arr| {
-            NETriFace::new(
-                arr[0] as u32,
-                arr[1] as u32,
-                arr[2] as u32,
-                0
-            )
-        }).collect()
-    )
+fn vec_to_tri_faces(indices: &Vec<u16>) -> Vec<NETriFace> {
+    indices.chunks_exact(3).map(|arr| {
+        NETriFace::new(
+            arr[0] as u32,
+            arr[1] as u32,
+            arr[2] as u32,
+            0
+        )
+    }).collect()
+}
+
+fn load_object(filename: &str) -> NEMesh {
+    let maybe_model: ObjResult<Obj<obj::Vertex>> = load_obj(new_object_reader(filename));
+    if let Ok(model) = maybe_model {
+        return NEMesh::new(
+            model.vertices.iter().map(|vertex| {
+                NEVertex::with_normal (
+                    Vec3::from_array(vertex.position),
+                    Vec3::from_array(vertex.normal),
+                    CellRef::new(0),
+                )
+            }).collect(),
+            vec_to_tri_faces(&model.indices)
+        );
+    }
+
+    let maybe_model: ObjResult<Obj<obj::Position>> = load_obj(new_object_reader(filename));
+    if let Ok(model) = maybe_model {
+        return NEMesh::new(
+            model.vertices.iter().map(|vertex| {
+                NEVertex::with_pos (
+                    Vec3::from_array(vertex.position),
+                    CellRef::new(0),
+                )
+            }).collect(),
+            vec_to_tri_faces(&model.indices)
+        );
+    }
+
+    panic!("could not read object in file {filename}");
 }
 
 pub fn load_scene(
@@ -149,7 +173,7 @@ pub fn load_scene(
                         let k = cond_array_to_vec(bsdf.get("k"), Vec3::ONE);
 
                         commands.spawn((
-                            Transform::from_translation(translate).with_scale(scale).with_rotation(Quat::from_euler(EulerRot::XYX, rotate.x.to_radians(), rotate.y.to_radians(), rotate.z.to_radians())),
+                            Transform::from_translation(translate).with_scale(scale).with_rotation(Quat::from_euler(EulerRot::XYZ, rotate.x.to_radians(), rotate.y.to_radians(), rotate.z.to_radians())),
                             model,
                             RaytracingMaterial {
                                 bsdf: string_to_bsdf(&bsdf_type),

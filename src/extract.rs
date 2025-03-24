@@ -20,14 +20,23 @@ pub struct GpuNEMesh {
 
 #[derive(ShaderType, Component, Clone, Debug)]
 pub struct GpuTransform {
-    pub transform: Mat4,
+    pub translate: Vec3,
+    pub scale: Vec3,
+    pub rotate: Mat3,
+    pub inv_rotate: Mat3,
 }
 
 impl GpuTransform {
-    pub fn new(mat: Mat4) -> Self {
+    pub fn new(translate: Vec3, scale: Vec3, rotate: Quat) -> Self {
         Self {
-            transform: mat
+            translate,
+            scale,
+            rotate: Mat3::from_quat(rotate),
+            inv_rotate: Mat3::from_quat(rotate).inverse(),
         }
+    }
+    pub fn apply(&self, v: Vec3) -> Vec3 {
+        self.rotate.mul_vec3(v) * self.scale + self.translate
     }
 }
 
@@ -40,7 +49,7 @@ impl ExtractComponent for GpuTransform {
         (transform): QueryItem<'_,
         Self::QueryData>
     ) -> Option<Self::Out> {
-        Some(Self::new(transform.compute_matrix()))
+        Some(Self::new(transform.translation(), transform.scale(), transform.rotation()))
     }
 }
 

@@ -37,8 +37,8 @@ fn intersect_triangle(ray: Ray, a: vec3f, b: vec3f, c: vec3f) -> HitInfo {
 		intersection.hit = true;
 	}
 
-    intersection.normal = normalize(cross(edge1, edge2));
     intersection.distance = t;
+    intersection.uv = vec2f(u, v);
 
 	return intersection;
 }
@@ -94,6 +94,8 @@ struct NEMesh {
 }
 struct NEVertex {
     position: vec3f,
+    normal: vec3f,
+    texture: vec3f,
     cell_ref: CellRef,
 }
 
@@ -139,6 +141,8 @@ struct HitInfo {
     intersection: vec3f,
     normal: vec3f,
     distance: f32,
+    uv: vec2f,
+
     face_index: u32,
     material_index: u32,
     mesh_index: u32,
@@ -166,12 +170,39 @@ struct BSDFContext {
 }
 
 struct Transform {
-    matrix: mat4x4f,
+    translate: vec3f,
+    scale: vec3f,
+    rotate: mat3x3f,
+    inv_rotate: mat3x3f,
 }
 
 struct Light {
     face_index: u32,
     mesh_index: u32,
+}
+
+struct Triangle {
+    a: NEVertex,
+    b: NEVertex,
+    c: NEVertex,
+}
+
+fn get_triangle(face: NETriFace, mesh: NEMesh, transform: Transform) -> Triangle {
+    var tri = Triangle(
+        vertex_buffer[mesh.vertex_offset + face.a],
+        vertex_buffer[mesh.vertex_offset + face.b],
+        vertex_buffer[mesh.vertex_offset + face.c],
+    );
+
+    tri.a.position = apply_transform(transform, tri.a.position);
+    tri.b.position = apply_transform(transform, tri.b.position);
+    tri.c.position = apply_transform(transform, tri.c.position);
+
+    tri.a.normal = apply_scale_rotation(transform, tri.a.normal);
+    tri.b.normal = apply_scale_rotation(transform, tri.b.normal);
+    tri.c.normal = apply_scale_rotation(transform, tri.c.normal);
+    
+    return tri;
 }
 
 // #import "shaders/const.wgsl"::{INV_PI, INV_TWOPI}
@@ -229,7 +260,25 @@ fn uniform_triangle_to_triangle(v: vec2f, a: vec3f, b: vec3f, c: vec3f) -> vec3f
 @group(1) @binding(6) var<storage, read> light_buffer: array<Light>;
 
 fn apply_transform(transform: Transform, v: vec3f) -> vec3f {
-    return (transform.matrix * vec4f(v, 1.0)).xyz;
+    return transform.translate + transform.scale * (transform.rotate * v);
+}
+fn apply_inv_transform(transform: Transform, v: vec3f) -> vec3f {
+    return transform.inv_rotate * ((v - transform.translate) / transform.scale);
+}
+fn apply_scale_rotation(transform: Transform, v: vec3f) -> vec3f {
+    return transform.scale * (transform.rotate * v);
+}
+fn apply_rotation(transform: Transform, v: vec3f) -> vec3f {
+    return transform.rotate * v;
+}
+fn apply_inv_rotation(transform: Transform, v: vec3f) -> vec3f {
+    return transform.inv_rotate * v;
+}
+fn apply_scale_translate(transform: Transform, v: vec3f) -> vec3f {
+    return transform.translate + transform.scale * v;
+}
+fn apply_inv_scale_translate(transform: Transform, v: vec3f) -> vec3f {
+    return (v - transform.translate) / transform.scale;
 }
 
 fn intersect_mesh_stack(ray: Ray, mesh: NEMesh) -> HitInfo {
@@ -242,7 +291,9 @@ fn intersect_mesh_stack(ray: Ray, mesh: NEMesh) -> HitInfo {
     let transform = transform_buffer[mesh.transform_index];
 
     var mod_ray = ray;
-    let inv_ray_dir = 1.0 / ray.direction;
+
+    let inv_ray_dir = 1.0 / apply_inv_rotation(transform, ray.direction);
+    let aabb_ray_origin = apply_inv_transform(transform, ray.origin);
 
     var stack = array<u32, 128>();
     var stack_index = 1u;
@@ -262,11 +313,8 @@ fn intersect_mesh_stack(ray: Ray, mesh: NEMesh) -> HitInfo {
         if bvh_node.shape_index != U32_MAX { // leaf node
             let face = tri_face_buffer[bvh_node.shape_index + mesh.face_offset];
 
-            // NOTE vertex access
-            let a = apply_transform(transform, vertex_buffer[face.a + mesh.vertex_offset].position);
-            let b = apply_transform(transform, vertex_buffer[face.b + mesh.vertex_offset].position);
-            let c = apply_transform(transform, vertex_buffer[face.c + mesh.vertex_offset].position);
-            let tri_hit_info = intersect_triangle(mod_ray, a, b, c);
+            let tri = get_triangle(face, mesh, transform);
+            let tri_hit_info = intersect_triangle(mod_ray, tri.a.position, tri.b.position, tri.c.position);
 
             if tri_hit_info.hit && tri_hit_info.distance < nearest_hit_info.distance {
                 nearest_hit_info = tri_hit_info;
@@ -282,19 +330,19 @@ fn intersect_mesh_stack(ray: Ray, mesh: NEMesh) -> HitInfo {
             let right_child = llas_buffer[bvh_offset + bvh_node.exit_index];
 
             let l = intersect_aabb(
-                mod_ray.origin + mod_ray.min * mod_ray.direction,
+                aabb_ray_origin,
                 inv_ray_dir,
-                mod_ray.max - mod_ray.min,
-                apply_transform(transform, left_child.min),
-                apply_transform(transform, left_child.max)
+                INF, // TODO mod_ray.max - mod_ray.min,
+                left_child.min,
+                left_child.max
             );
 
             let r = intersect_aabb(
-                mod_ray.origin + mod_ray.min * mod_ray.direction,
+                aabb_ray_origin,
                 inv_ray_dir,
-                mod_ray.max - mod_ray.min,
-                apply_transform(transform, right_child.min),
-                apply_transform(transform, right_child.max)
+                INF, // TODO mod_ray.max - mod_ray.min,
+                right_child.min,
+                right_child.max
             );
 
             if l < r { // left is nearer
@@ -334,7 +382,8 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
 
     var mod_ray = ray;
 
-    let inv_ray_dir = 1.0 / ray.direction;
+    let inv_ray_dir = 1.0 / apply_inv_rotation(transform, ray.direction);
+    let aabb_ray_origin = apply_inv_transform(transform, ray.origin);
 
     let bvh_offset = mesh.bvh_root;
     var bvh_index = 0u;
@@ -349,11 +398,8 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
 
             let face = tri_face_buffer[bvh_node.shape_index + mesh.face_offset];
 
-            // NOTE vertex access
-            let a = apply_transform(transform, vertex_buffer[face.a + mesh.vertex_offset].position);
-            let b = apply_transform(transform, vertex_buffer[face.b + mesh.vertex_offset].position);
-            let c = apply_transform(transform, vertex_buffer[face.c + mesh.vertex_offset].position);
-            let tri_hit_info = intersect_triangle(mod_ray, a, b, c);
+            let tri = get_triangle(face, mesh, transform);
+            let tri_hit_info = intersect_triangle(mod_ray, tri.a.position, tri.b.position, tri.c.position);
 
             if tri_hit_info.hit && tri_hit_info.distance < nearest_hit_info.distance {
                 nearest_hit_info = tri_hit_info;
@@ -367,11 +413,11 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
         }
         else {
             let a = intersect_aabb(
-                mod_ray.origin + mod_ray.min * mod_ray.direction,
+                aabb_ray_origin,
                 inv_ray_dir,
-                mod_ray.max - mod_ray.min,
-                apply_transform(transform, bvh_node.min),
-                apply_transform(transform, bvh_node.max)
+                INF, // TODO mod_ray.max - mod_ray.min,
+                bvh_node.min,
+                bvh_node.max
             );
             if a < INF {
                 bvh_index = bvh_node.entry_index;
@@ -382,6 +428,50 @@ fn intersect_mesh(ray: Ray, mesh: NEMesh) -> HitInfo {
     }
 
     nearest_hit_info.test_count = test_count;
+
+    return nearest_hit_info;
+}
+
+fn trace_ray(ray: Ray) -> HitInfo {
+    var nearest_hit_info = HitInfo();
+    nearest_hit_info.distance = INF;
+
+    // move origin slightly to eliminate rounding errors
+    var mod_ray = ray;
+    mod_ray.min = 0.01;
+
+    var test_count = 0.0;
+
+    for (var mesh_index: u32 = 0; mesh_index < arrayLength(&mesh_buffer); mesh_index++) {
+        let mesh = mesh_buffer[mesh_index];
+        let mesh_hit_info = intersect_mesh(mod_ray, mesh);
+
+        test_count += mesh_hit_info.test_count;
+
+        if mesh_hit_info.hit && mesh_hit_info.distance < nearest_hit_info.distance {
+            nearest_hit_info = mesh_hit_info;
+            nearest_hit_info.mesh_index = mesh_index;
+
+            mod_ray.max = mesh_hit_info.distance;
+        }
+    }
+    nearest_hit_info.test_count = test_count;
+
+    if nearest_hit_info.hit {
+        let face = tri_face_buffer[nearest_hit_info.face_index];
+        let mesh = mesh_buffer[nearest_hit_info.mesh_index];
+        let transform = transform_buffer[mesh.transform_index];
+
+        let barycentric = vec3f(1.0 - nearest_hit_info.uv.x - nearest_hit_info.uv.y, nearest_hit_info.uv);
+
+        let tri = get_triangle(face, mesh, transform);
+
+        nearest_hit_info.normal = normalize(select(
+            cross(tri.b.position - tri.a.position, tri.c.position - tri.a.position),
+            barycentric.x * tri.a.normal + barycentric.y * tri.b.normal + barycentric.z * tri.c.normal,
+            dot(tri.a.normal, tri.a.normal) != 0.0 && dot(tri.b.normal, tri.b.normal) != 0.0 && dot(tri.c.normal, tri.c.normal) != 0.0
+        ));
+    }
 
     return nearest_hit_info;
 }
@@ -532,16 +622,10 @@ fn diffuse_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) ->
 }
 
 fn conductor_eval(context: BSDFContext, material: Material) -> vec3f {
-    // if cos_theta(context.incident_dir) <= 0 || cos_theta(context.outgoing_dir) <= 0 {
-    //     return vec3f(0.0);
-    // }
-    return material.albedo * INV_PI;
+    return vec3f(0.0);
 }
 fn conductor_pdf(context: BSDFContext, material: Material) -> f32 {
-    if cos_theta(context.incident_dir) <= 0 || cos_theta(context.outgoing_dir) <= 0 {
-        return 0.0;
-    }
-    return INV_PI * cos_theta(context.outgoing_dir);
+    return 0.0;
 }
 fn conductor_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> BSDFContext {
     var context = BSDFContext();
@@ -552,8 +636,8 @@ fn conductor_sample(incident_dir: vec3f, rng_sample: vec2f, material: Material) 
         return context;
     }
 
-    context.outgoing_dir = square_to_cosine_hemisphere(rng_sample);
-    context.color = material.albedo;
+    context.outgoing_dir = reflect(incident_dir);
+    context.color = fresnel_conductor(context.outgoing_dir, material.eta, material.k);
     context.relative_refractive_index = 1.0;
 
     return context;
@@ -579,6 +663,31 @@ fn fresnel_dielectric(cos_theta_I: f32, extIOR: f32, intIOR: f32) -> f32 {
            / (etaT * cos_theta_I + etaI * cos_theta_T);
 
     return (Rs * Rs + Rp * Rp) / 2.0;
+}
+
+fn fresnel_conductor(incident_dir: vec3f, eta: vec3f, k: vec3f) -> vec3f {
+    let cosTheta = cos_theta(incident_dir);
+    let cos2Theta = cosTheta * cosTheta;
+    let sin2Theta = 1 - cos2Theta;
+    let sinTheta = sqrt(sin2Theta);
+    let tanTheta = sinTheta / cosTheta;
+
+    let eta2 = eta * eta;
+    let k2 = k * k;
+
+    let a = eta2 - k2 - sin2Theta;
+    let s = sqrt(a * a + 4.0 * eta2 * k2);
+
+    let a2 = 0.5 * (s + a);
+    let b2 = 0.5 * (s - a);
+    let c = a2 + b2;
+
+    let Rs = (c - 2.0 * eta * cosTheta + vec3f(cos2Theta)) / 
+             (c + 2.0 * eta * cosTheta + vec3f(cos2Theta));
+    let Rp = (c - 2.0 * eta * sinTheta * tanTheta + vec3f(sin2Theta * tanTheta * tanTheta)) /
+             (c + 2.0 * eta * sinTheta * tanTheta + vec3f(sin2Theta * tanTheta * tanTheta));
+
+    return 0.5 * (Rs + Rp);
 }
 
 fn dielectric_eval(context: BSDFContext, material: Material) -> vec3f {
@@ -650,33 +759,6 @@ fn sample_bsdf(incident_dir: vec3f, rng_sample: vec2f, material: Material) -> BS
         return conductor_sample(incident_dir, rng_sample, material);
     }
     return BSDFContext();
-}
-
-fn trace_ray(ray: Ray) -> HitInfo {
-    var nearest_hit_info = HitInfo();
-    nearest_hit_info.distance = INF;
-
-    // move origin slightly to eliminate rounding errors
-    var mod_ray = ray;
-    mod_ray.min = 0.01;
-
-    var test_count = 0.0;
-
-    for (var mesh_index: u32 = 0; mesh_index < arrayLength(&mesh_buffer); mesh_index++) {
-        let mesh = mesh_buffer[mesh_index];
-        let mesh_hit_info = intersect_mesh(mod_ray, mesh);
-
-        test_count += mesh_hit_info.test_count;
-
-        if mesh_hit_info.hit && mesh_hit_info.distance < nearest_hit_info.distance {
-            nearest_hit_info = mesh_hit_info;
-            nearest_hit_info.mesh_index = mesh_index;
-
-            mod_ray.max = mesh_hit_info.distance;
-        }
-    }
-    nearest_hit_info.test_count = test_count;
-    return nearest_hit_info;
 }
 
 // RNG from https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-37-efficient-random-number-generation-and-application
@@ -800,14 +882,12 @@ fn sample_emitter_direct(origin: vec3f, light: Light, rng_sample: vec2f) -> Emit
     let transform = transform_buffer[mesh.transform_index];
 
     // NOTE vertex access
-    let a = apply_transform(transform, vertex_buffer[face.a + mesh.vertex_offset].position);
-    let b = apply_transform(transform, vertex_buffer[face.b + mesh.vertex_offset].position);
-    let c = apply_transform(transform, vertex_buffer[face.c + mesh.vertex_offset].position);
+    let tri = get_triangle(face, mesh, transform);
 
-    let n = normalize(cross(b - a, c - a));
+    let n = normalize(cross(tri.b.position - tri.a.position, tri.c.position - tri.a.position));
     let p = uniform_triangle_to_triangle(
         square_to_uniform_triangle(rng_sample),
-        a, b, c
+        tri.a.position, tri.b.position, tri.c.position
     );
 
     let local_frame = create_frame(n);
@@ -843,7 +923,7 @@ fn is_nan(v: vec3f) -> bool {
     return !(l < 0.0 || l >= 0.0);
 }
 
-fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>, metropolis_state: ptr<function, MetropolisState>) -> vec3f {
+fn eval_bsdf_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
     var throughput = vec3f(1.0);
     var radiance = vec3f(0.0);
     var ray = in_ray;
@@ -930,6 +1010,10 @@ fn eval_mis_path(in_ray: Ray, rng_state: ptr<function, RngState>) -> vec3f {
         let local_frame = create_frame(hit_info.normal);
         let incident_dir = to_local(-ray.direction, local_frame);
 
+        if true {
+            // return vec3f(cos_theta(incident_dir));
+        }
+
         let material = material_buffer[hit_info.material_index];
 
         if is_emitter(material) {
@@ -1005,6 +1089,7 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4f {
     var color = vec3f(0.0);
     for (var sample_index = 0u; sample_index < camera.samples; sample_index++) {
         color += eval_mis_path(ray_from_uv(in.uv), &rng_state);
+        // color += eval_bsdf_path(ray_from_uv(in.uv), &rng_state);
     }
     return vec4f(color / f32(camera.samples), 1.0);
 }
